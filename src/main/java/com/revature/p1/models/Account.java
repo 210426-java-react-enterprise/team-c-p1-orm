@@ -2,7 +2,7 @@ package com.revature.p1.models;
 
 import com.revature.p1.utils.Column;
 import com.revature.p1.utils.Entity;
-import com.revature.p1.utils.Pk;
+import com.revature.p1.utils.Key;
 
 @Entity(name = "accounts")
 public class Account {
@@ -13,7 +13,7 @@ public class Account {
         this.balance = balance;
     }
 
-    @Pk
+    @Key
     @Column(name = "id")
     private int id;
 

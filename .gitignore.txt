@@ -24,7 +24,7 @@ hs_err_pid*
 
 # ide specific files
 *.iml
-/.idea
+.idea/
 
 # build files
 target/

@@ -5,7 +5,8 @@ import com.revature.p1.models.AppUser;
 import com.revature.p1.models.User;
 import com.revature.p1.utils.Column;
 import com.revature.p1.utils.Entity;
-import com.revature.p1.utils.Pk;
+import com.revature.p1.utils.Key;
+import com.revature.p1.utils.QueryBuilder;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -22,13 +23,15 @@ public class Driver {
         // Account account = new Account();
 
         Driver driver = new Driver();
+        QueryBuilder qb = new QueryBuilder();
 
         //driver.doStuffWithObject(account);
         try {
-            System.out.println(driver.createInsertQueryFromObject(user));
-            System.out.println(driver.createInsertQueryFromObject(user1));
-            System.out.println(driver.createInsertQueryFromObject(account));
-        } catch (IllegalAccessException e) {
+//            System.out.println(driver.createInsertQueryFromObject(user));
+//            System.out.println(driver.createInsertQueryFromObject(user1));
+//            System.out.println(driver.createInsertQueryFromObject(account));
+            System.out.println(qb.prepareInsertQueryFromObject(user1, null));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -44,7 +47,7 @@ public class Driver {
 //            Column annotation = field.getAnnotation(Column.class);
             System.out.println(field.getAnnotation(Column.class).name());
             System.out.println(field.isAnnotationPresent(Column.class));
-            System.out.println(field.isAnnotationPresent(Pk.class));
+            System.out.println(field.isAnnotationPresent(Key.class));
         }
 
         System.out.println("=================================");
@@ -53,7 +56,7 @@ public class Driver {
     public String createInsertQueryFromObject(Object object) throws IllegalAccessException {
         StringBuilder sb = new StringBuilder();
         Class<?> oClass = Objects.requireNonNull(object.getClass());
-        Class<Pk> id = Pk.class;
+        Class<Key> id = Key.class;
         Class<Column> column = Column.class;
 
         if (!oClass.isAnnotationPresent(Entity.class))

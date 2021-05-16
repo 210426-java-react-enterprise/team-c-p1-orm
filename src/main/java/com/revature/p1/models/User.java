@@ -3,12 +3,12 @@ package com.revature.p1.models;
 
 import com.revature.p1.utils.Column;
 import com.revature.p1.utils.Entity;
-import com.revature.p1.utils.Pk;
+import com.revature.p1.utils.Key;
 
 @Entity(name = "users")
 public class User {
 
-    @Pk
+    @Key
     @Column(name = "userid")
     private int id;
 

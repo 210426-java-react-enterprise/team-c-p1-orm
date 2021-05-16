@@ -2,7 +2,7 @@ package com.revature.p1.models;
 
 import com.revature.p1.utils.Column;
 import com.revature.p1.utils.Entity;
-import com.revature.p1.utils.Pk;
+import com.revature.p1.utils.Key;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,8 +14,8 @@ import java.time.format.DateTimeFormatter;
  */
 @Entity(name = "app_users")
 public class AppUser {
-    @Pk
-    @Column
+    @Key
+    @Column(name = "user_id")
     private int userID;
     @Column
     private String userName;
