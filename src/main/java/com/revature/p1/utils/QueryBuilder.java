@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class QueryBuilder {
 
-    public PreparedStatement prepareInsertQueryFromObject(Object object, Connection connection) {
+    public PreparedStatement prepareInsertQueryFromObject(Object object, Connection connection) { //connection to come Soon™
         StringBuilder sb = new StringBuilder();
         Class<?> oClass = Objects.requireNonNull(object.getClass());
         PreparedStatement stmt = null;
@@ -57,8 +57,9 @@ public class QueryBuilder {
                 if (field.isAnnotationPresent(Column.class)) {
                     if (field.isAnnotationPresent(Key.class))
                         continue;
-
+                    field.setAccessible(true);
                     stmt.setObject(counter, field.get(object));
+                    field.setAccessible(false);
                     counter++;
                 }
             }
