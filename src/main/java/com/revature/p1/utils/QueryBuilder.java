@@ -72,7 +72,6 @@ public class QueryBuilder {
         StringBuilder sb = new StringBuilder();
         Objects.requireNonNull(clazz);
 
-
         if (!clazz.isAnnotationPresent(Entity.class))
             throw new IllegalArgumentException(clazz.getName() + " is not an Entity");
 
@@ -91,8 +90,70 @@ public class QueryBuilder {
         return null;
     }
 
+    public <T> PreparedStatement createUpdateQueryFromObject (T object, Connection connection) throws IllegalAccessException {
+        StringBuilder sb = new StringBuilder();
+        Class<?> clazz = Objects.requireNonNull(object.getClass());
+
+        if(!clazz.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(clazz.getName() + " is not an Entity!");
+
+        String entityName = clazz.getAnnotation(Entity.class).name();
+        String tableName = entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName;
+        String keyFieldName = getPrimaryField(clazz).getAnnotation(Column.class).name();
+        String primaryFieldName = keyFieldName.isEmpty() ? getPrimaryField(clazz).getName().toLowerCase(Locale.ROOT) : keyFieldName;
+
+        sb.append("update ").append(tableName).append(" set ");
+        for (Field field: clazz.getDeclaredFields()) {
+            if(field.isAnnotationPresent(Column.class)){
+                if (field.isAnnotationPresent(Key.class))
+                    continue;
+
+                field.setAccessible(true);
+                String fieldName = field.getAnnotation(Column.class).name();
+                String columnName = fieldName.isEmpty() ? field.getName().toLowerCase(Locale.ROOT) : fieldName;
+
+                sb.append(columnName).append(" = ").append(field.get(object)).append(", ");
+                field.setAccessible(false);
+            }
+        }
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        sb.append("where ").append(primaryFieldName).append( " = ").append(getPrimaryKey(object)).append(";");
+
+        try {
+            return connection.prepareStatement(sb.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    public <T> PreparedStatement createDeleteQueryFromObject(Class<?> clazz, T id, Connection connection) {
+        StringBuilder sb = new StringBuilder();
+        Objects.requireNonNull(clazz);
+
+        if (!clazz.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(clazz.getName() + " is not an Entity");
+
+        String entityName = clazz.getAnnotation(Entity.class).name();
+        String fieldName = getPrimaryField(clazz).getAnnotation(Column.class).name();
+        String primaryFieldName = fieldName.isEmpty() ? getPrimaryField(clazz).getName().toLowerCase(Locale.ROOT) : fieldName;
+
+        sb.append("delete from ").append(entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName)
+                .append(" where ").append(primaryFieldName).append(" = ").append(id).append(";");
+
+        try {
+            return connection.prepareStatement(sb.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     @SuppressWarnings("unchecked")
-    private <T> T getPrimaryKey(T object) throws IllegalAccessException { //not useless yet, but I was createSelectQueryFromClass wrong
+    private <T> T getPrimaryKey(T object) throws IllegalAccessException {
         Class<?> oClass = Objects.requireNonNull(object.getClass());
 
         if (!oClass.isAnnotationPresent(Entity.class))
