@@ -1,22 +1,19 @@
 package com.revature.p1.utils;
 
-import com.sun.corba.se.spi.ior.ObjectKey;
-
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 public class QueryBuilder {
 
-    public PreparedStatement prepareInsertQueryFromObject(Object object, Connection connection) { //connection to come Soon™
+    public <T> PreparedStatement prepareInsertQueryFromObject(T object, Connection connection) { //Connection to come Soon™
         StringBuilder sb = new StringBuilder();
         Class<?> oClass = Objects.requireNonNull(object.getClass());
         PreparedStatement stmt = null;
-
 
         if (!oClass.isAnnotationPresent(Entity.class))
             throw new IllegalArgumentException("This class is not an entity!");
@@ -69,6 +66,51 @@ public class QueryBuilder {
         }
 
         return stmt;
+    }
+
+    public <T> PreparedStatement createSelectQueryFromClass(Class<?> clazz, T id, Connection connection) {
+        StringBuilder sb = new StringBuilder();
+        Objects.requireNonNull(clazz);
+
+
+        if (!clazz.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(clazz.getName() + " is not an Entity");
+
+        String entityName = clazz.getAnnotation(Entity.class).name();
+        String fieldName = getPrimaryField(clazz).getAnnotation(Column.class).name();
+        String primaryFieldName = fieldName.isEmpty() ? getPrimaryField(clazz).getName().toLowerCase(Locale.ROOT) : fieldName;
+
+        sb.append("select * from ").append(entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName)
+        .append(" where ").append(primaryFieldName).append(" = ").append(id).append(";");
+
+        try {
+            return connection.prepareStatement(sb.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getPrimaryKey(T object) throws IllegalAccessException { //not useless yet, but I was createSelectQueryFromClass wrong
+        Class<?> oClass = Objects.requireNonNull(object.getClass());
+
+        if (!oClass.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(oClass.getName() + " is not an Entity");
+
+        Field keyField = getPrimaryField(oClass);
+
+        keyField.setAccessible(true);
+        T key = (T) keyField.get(object);
+        keyField.setAccessible(false);
+
+        return key;
+    }
+
+    private Field getPrimaryField(Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Key.class))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("This entity does not have a primary key"));
     }
 
 }
