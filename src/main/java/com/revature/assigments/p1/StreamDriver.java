@@ -24,7 +24,7 @@ public class StreamDriver {
 
         outlookUsers.forEach(AppUser -> System.out.println(AppUser.getEmail()));
 
-        outlookUsers = new Consumer<>()
+
     }
 
 }
