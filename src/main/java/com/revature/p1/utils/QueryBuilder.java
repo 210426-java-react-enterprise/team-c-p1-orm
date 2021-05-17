@@ -104,7 +104,7 @@ public class QueryBuilder {
 
         sb.append("update ").append(tableName).append(" set ");
         for (Field field: clazz.getDeclaredFields()) {
-            if(field.isAnnotationPresent(Column.class)){
+            if(field.isAnnotationPresent(Column.class)) {
                 if (field.isAnnotationPresent(Key.class))
                     continue;
 
@@ -154,12 +154,12 @@ public class QueryBuilder {
 
     @SuppressWarnings("unchecked")
     private <T> T getPrimaryKey(T object) throws IllegalAccessException {
-        Class<?> oClass = Objects.requireNonNull(object.getClass());
+        Class<?> clazz = Objects.requireNonNull(object.getClass());
 
-        if (!oClass.isAnnotationPresent(Entity.class))
-            throw new IllegalArgumentException(oClass.getName() + " is not an Entity");
+        if (!clazz.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(clazz.getName() + " is not an Entity");
 
-        Field keyField = getPrimaryField(oClass);
+        Field keyField = getPrimaryField(clazz);
 
         keyField.setAccessible(true);
         T key = (T) keyField.get(object);

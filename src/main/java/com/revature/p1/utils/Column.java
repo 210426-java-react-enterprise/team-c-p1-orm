@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
     String name() default "";
-    boolean nullable() default false;
+    boolean nullable() default true;
 }

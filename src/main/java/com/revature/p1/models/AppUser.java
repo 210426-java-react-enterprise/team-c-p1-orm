@@ -38,9 +38,8 @@ public class AppUser {
 
     }
 
-    public AppUser(int userID, String userName, String password, String email, String firstName, String lastName, LocalDateTime birthday,
+    public AppUser(String userName, String password, String email, String firstName, String lastName, LocalDateTime birthday,
                 int age) {
-        this.userID = userID;
         this.setUserName(userName);
         this.setPassword(password);
         this.setEmail(email);
@@ -50,6 +49,7 @@ public class AppUser {
         this.setJoinedDate(LocalDateTime.now());
         this.setAge(age);
     }
+
 
 
     public String getUserName() {
