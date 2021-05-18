@@ -6,20 +6,21 @@ import com.revature.assigments.p1.annotations.Id;
 
 import java.util.ArrayList;
 
-@Entity
+@Entity (name = "app_user")
 public class AppUser {
 
     @Id
+    @Column(name = "user_id")
     private int id;
-    @Column
+    @Column(name ="username")
     private  String username;
-    @Column
+    @Column(name ="password")
     private String password;
-    @Column
+    @Column(name ="firstName")
     private String firstName;
-    @Column
+    @Column(name ="lastName")
     private String lastName;
-    @Column
+    @Column(name ="email")
     private String email;
     private ArrayList<AppAccount> accounts = new ArrayList<AppAccount>();
 

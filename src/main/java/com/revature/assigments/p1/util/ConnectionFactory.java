@@ -48,7 +48,7 @@ public class ConnectionFactory {
 
         return connectionFactory;
     }
-    
+
     public List<Connection> getPoolOfConnections(int numOfConnections){
         List<Connection> conns = new ArrayList<>();
         Connection conn = null;
