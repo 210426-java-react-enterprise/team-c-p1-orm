@@ -48,20 +48,7 @@ public class ConnectionFactory {
 
         return connectionFactory;
     }
-
-    /*
-    public Connection getConnection(){
-        Connection conn = null;
-
-        try {
-            conn = DriverManager.getConnection(props.getProperty("host=url"),props.getProperty("username"), props.getProperty("password"));
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return conn;
-    }
-    */
-
+    
     public List<Connection> getPoolOfConnections(int numOfConnections){
         List<Connection> conns = new ArrayList<>();
         Connection conn = null;
