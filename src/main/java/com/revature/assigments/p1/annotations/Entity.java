@@ -1,10 +1,11 @@
-package com.revature.assigments.p1.util;
+package com.revature.assigments.p1.annotations;
 
 import java.lang.annotation.*;
 
 @Documented
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Column {
+public @interface Entity {
     String name() default "";
+
 }

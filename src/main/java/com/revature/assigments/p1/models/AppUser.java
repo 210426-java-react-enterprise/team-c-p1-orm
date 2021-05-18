@@ -1,8 +1,8 @@
 package com.revature.assigments.p1.models;
 
-import com.revature.assigments.p1.util.Column;
-import com.revature.assigments.p1.util.Entity;
-import com.revature.assigments.p1.util.Id;
+import com.revature.assigments.p1.annotations.Column;
+import com.revature.assigments.p1.annotations.Entity;
+import com.revature.assigments.p1.annotations.Id;
 
 import java.util.ArrayList;
 
