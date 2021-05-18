@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
+
 import static com.revature.assigments.p1.MyCustomORMDriver.NUMOFCONNECTIONS;
 
 public class ConnectionFactory {
@@ -28,7 +27,7 @@ public class ConnectionFactory {
         Properties props = new Properties();
         try{
             for (int i = 0; i < numOfConnections; i++) {
-                String filePath = "src/main/resources/connections/application_thread_"+ i +".properties";
+                String filePath = "src/main/resources/connections/application_conn_"+ i +".properties";
                 props.load(new FileReader(filePath));
                 propsPool.add(props);
             }
@@ -63,6 +62,20 @@ public class ConnectionFactory {
             throwables.printStackTrace();
         }
 
+        return conns;
+    }
+
+    public Queue<Connection> getPoolOfConnectionsAsQueue(int numOfConnections){
+        Queue<Connection> conns = new LinkedList<>();
+        Connection conn=null;
+        try{
+            for(Properties props : propsPool){
+                conn = DriverManager.getConnection(props.getProperty("host-url"),props.getProperty("username"), props.getProperty("password"));
+                conns.add(conn);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         return conns;
     }
 
