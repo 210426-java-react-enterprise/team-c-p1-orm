@@ -1,14 +1,25 @@
 package com.revature.assigments.p1.models;
 
+import com.revature.assigments.p1.util.Column;
+import com.revature.assigments.p1.util.Entity;
+import com.revature.assigments.p1.util.Id;
+
 import java.util.ArrayList;
 
+@Entity
 public class AppUser {
 
+    @Id
     private int id;
+    @Column
     private  String username;
+    @Column
     private String password;
+    @Column
     private String firstName;
+    @Column
     private String lastName;
+    @Column
     private String email;
     private ArrayList<AppAccount> accounts = new ArrayList<AppAccount>();
 
