@@ -1,5 +1,9 @@
 package com.revature.p1.utils;
 
+import com.revature.p1.utils.annotations.Column;
+import com.revature.p1.utils.annotations.Entity;
+import com.revature.p1.utils.annotations.Key;
+
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

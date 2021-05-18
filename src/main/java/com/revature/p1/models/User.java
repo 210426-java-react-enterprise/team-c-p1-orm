@@ -1,9 +1,9 @@
 package com.revature.p1.models;
 
 
-import com.revature.p1.utils.Column;
-import com.revature.p1.utils.Entity;
-import com.revature.p1.utils.Key;
+import com.revature.p1.utils.annotations.Column;
+import com.revature.p1.utils.annotations.Entity;
+import com.revature.p1.utils.annotations.Key;
 
 @Entity(name = "users")
 public class User {

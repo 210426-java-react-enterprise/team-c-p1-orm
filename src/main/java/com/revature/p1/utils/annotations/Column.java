@@ -1,4 +1,4 @@
-package com.revature.p1.utils;
+package com.revature.p1.utils.annotations;
 
 import java.lang.annotation.*;
 
@@ -8,5 +8,5 @@ import java.lang.annotation.*;
 public @interface Column {
     String name() default "";
     boolean nullable() default true;
-    boolean timestamp() default false;
+    boolean isTimestamp() default false;
 }

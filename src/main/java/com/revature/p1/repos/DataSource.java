@@ -1,10 +1,11 @@
-package com.revature.p1.utils;
+package com.revature.p1.repos;
+
+import com.revature.p1.repos.ConnectionPool;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class DataSource implements ConnectionPool {

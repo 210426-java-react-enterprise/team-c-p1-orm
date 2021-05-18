@@ -1,12 +1,10 @@
 package com.revature.p1.models;
 
-import com.revature.p1.utils.Column;
-import com.revature.p1.utils.Entity;
-import com.revature.p1.utils.Key;
+import com.revature.p1.utils.annotations.Column;
+import com.revature.p1.utils.annotations.Entity;
+import com.revature.p1.utils.annotations.Key;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * User
@@ -28,9 +26,9 @@ public class AppUser {
     private String firstName;
     @Column(name = "last_name")
     private String lastName;
-    @Column(timestamp = true)
+    @Column(isTimestamp = true)
     private LocalDateTime birthday; //TODO calculate age from birthday
-    @Column(name = "joined_date", timestamp = true)
+    @Column(name = "joined_date", isTimestamp = true)
     private LocalDateTime joinedDate;
     @Column
     private int age;

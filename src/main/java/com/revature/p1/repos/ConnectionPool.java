@@ -1,4 +1,4 @@
-package com.revature.p1.utils;
+package com.revature.p1.repos;
 
 import java.sql.Connection;
 import java.sql.SQLException;

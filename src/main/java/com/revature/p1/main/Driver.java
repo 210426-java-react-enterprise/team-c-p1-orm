@@ -18,13 +18,6 @@ public class Driver {
 
     public static void main(String[] args) {
 
-        Session session = new Session();
-        try {
-            AppUser user = (AppUser) session.get(AppUser.class, 4);
-            System.out.println(user);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
     }
 
