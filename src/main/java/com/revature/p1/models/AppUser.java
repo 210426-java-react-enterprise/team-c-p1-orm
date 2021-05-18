@@ -4,6 +4,7 @@ import com.revature.p1.utils.Column;
 import com.revature.p1.utils.Entity;
 import com.revature.p1.utils.Key;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,10 +13,10 @@ import java.time.format.DateTimeFormatter;
  * <p>
  * POJO to represent Users within the banking application
  */
-@Entity(name = "app_users")
+@Entity(name = "users")
 public class AppUser {
     @Key
-    @Column(name = "user_id")
+    @Column
     private int userID;
     @Column
     private String userName;
@@ -23,13 +24,13 @@ public class AppUser {
     private String password;
     @Column
     private String email;
-    @Column
+    @Column(name = "first_name")
     private String firstName;
-    @Column
+    @Column(name = "last_name")
     private String lastName;
-    @Column
+    @Column(timestamp = true)
     private LocalDateTime birthday; //TODO calculate age from birthday
-    @Column
+    @Column(name = "joined_date", timestamp = true)
     private LocalDateTime joinedDate;
     @Column
     private int age;
@@ -50,7 +51,29 @@ public class AppUser {
         this.setAge(age);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("User{");
+        sb.append("userID=").append(userID);
+        sb.append(", userName='").append(userName).append('\'');
+        sb.append(", password='").append(password).append('\'');
+        sb.append(", email='").append(email).append('\'');
+        sb.append(", firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", birthday=").append(birthday);
+        sb.append(", joinedDate=").append(joinedDate);
+        sb.append(", age=").append(age);
+        sb.append('}');
+        return sb.toString();
+    }
 
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
 
     public String getUserName() {
         return userName;
@@ -100,14 +123,6 @@ public class AppUser {
         this.birthday = birthday;
     }
 
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
     public LocalDateTime getJoinedDate() {
         return joinedDate;
     }
@@ -116,37 +131,11 @@ public class AppUser {
         this.joinedDate = joinedDate;
     }
 
-    public int getUserID() {
-        return userID;
+    public int getAge() {
+        return age;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
-
-    public String getBirthdayFormatted() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
-        return formatter.format(birthday);
-    }
-
-    public String getJoinedDayFormatted() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00");
-        return formatter.format(joinedDate);
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("User{");
-        sb.append("userID=").append(userID);
-        sb.append(", userName='").append(userName).append('\'');
-        sb.append(", password='").append(password).append('\'');
-        sb.append(", email='").append(email).append('\'');
-        sb.append(", firstName='").append(firstName).append('\'');
-        sb.append(", lastName='").append(lastName).append('\'');
-        sb.append(", birthday=").append(birthday);
-        sb.append(", joinedDate=").append(joinedDate);
-        sb.append(", age=").append(age);
-        sb.append('}');
-        return sb.toString();
+    public void setAge(int age) {
+        this.age = age;
     }
 }
