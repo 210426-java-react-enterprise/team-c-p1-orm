@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import static com.revature.assigments.p1.MyCustomORMDriver.NUMOFCONNECTIONS;
 
 public class ConnectionFactory {
 
@@ -27,7 +28,7 @@ public class ConnectionFactory {
         Properties props = new Properties();
         try{
             for (int i = 0; i < numOfConnections; i++) {
-                String filePath = "src/main/resources/connections/application_thread_"+ i+1 +".properties";
+                String filePath = "src/main/resources/connections/application_thread_"+ i +".properties";
                 props.load(new FileReader(filePath));
                 propsPool.add(props);
             }
@@ -42,7 +43,7 @@ public class ConnectionFactory {
     public static ConnectionFactory getInstance() {
 
         if (connectionFactory == null){
-            connectionFactory = new ConnectionFactory(1);
+            connectionFactory = new ConnectionFactory(NUMOFCONNECTIONS);
         }
 
         return connectionFactory;

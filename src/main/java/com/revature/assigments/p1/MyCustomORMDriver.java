@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public class MyCustomORMDriver {
+    public static final int NUMOFCONNECTIONS =2;
 
     public static void main(String[] args){
 
