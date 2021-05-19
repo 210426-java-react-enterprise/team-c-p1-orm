@@ -10,11 +10,9 @@ import java.util.Objects;
 
 public class EntityManager {
 
-    private DataSource dataSource;
-    private QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder;
 
-    public EntityManager(DataSource dataSource, QueryBuilder queryBuilder) {
-        this.dataSource = dataSource;
+    public EntityManager(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
     }
 
@@ -25,9 +23,8 @@ public class EntityManager {
         Objects.requireNonNull(id);
         E object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
         try {
-            Connection connection = dataSource.getConnection();
+            Connection connection = DataSource.getInstance().getConnection();
             PreparedStatement stmt = queryBuilder.createSelectQueryFromClass(clazz, id, connection);
-
             ResultSet rs = stmt.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
             Field[] fields = clazz.getDeclaredFields();
@@ -44,6 +41,7 @@ public class EntityManager {
                     temp.setAccessible(false);
                 }
             }
+            DataSource.getInstance().releaseConnection(connection);
             return object;
 
         } catch (SQLException | IllegalAccessException e) {
@@ -55,9 +53,13 @@ public class EntityManager {
 
     public <T> boolean update(T object) {
         try {
-            Connection connection = dataSource.getConnection();
+            Connection connection = DataSource.getInstance().getConnection();
+            connection.setAutoCommit(false);
             PreparedStatement stmt = queryBuilder.createUpdateQueryFromObject(object, connection);
             stmt.executeUpdate();
+            connection.commit();
+            connection.setAutoCommit(true);
+            DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException | IllegalAccessException e) {
             e.printStackTrace();
@@ -67,9 +69,23 @@ public class EntityManager {
 
     public <T> boolean save(T object) {
         try {
-            Connection connection = dataSource.getConnection();
+            Connection connection = DataSource.getInstance().getConnection();
             PreparedStatement stmt = queryBuilder.prepareInsertQueryFromObject(object, connection);
             stmt.executeUpdate();
+            DataSource.getInstance().releaseConnection(connection);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public <T> boolean delete (Class<?> clazz, T id) {
+        try {
+            Connection connection = DataSource.getInstance().getConnection();
+            PreparedStatement stmt = queryBuilder.createDeleteQueryFromObject(clazz, id, connection);
+            stmt.executeUpdate();
+            DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

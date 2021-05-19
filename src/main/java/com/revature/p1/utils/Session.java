@@ -10,19 +10,17 @@ import java.util.Objects;
 
 public class Session {
 
-    private DataSource dataSource;
-    private QueryBuilder queryBuilder;
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     public Session() {
-        dataSource = new DataSource();
-        queryBuilder = new QueryBuilder();
-        entityManager = new EntityManager(dataSource, queryBuilder);
+        QueryBuilder queryBuilder = new QueryBuilder();
+        entityManager = new EntityManager(queryBuilder);
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
+    public EntityManager getEntityManager() {
+        return entityManager;
     }
+
 
 //    public void shutdown() {
 //        try {

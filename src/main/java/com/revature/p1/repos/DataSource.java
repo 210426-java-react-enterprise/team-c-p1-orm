@@ -1,9 +1,9 @@
 package com.revature.p1.repos;
 
-import com.revature.p1.repos.ConnectionPool;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,11 @@ public class DataSource implements ConnectionPool {
     private List<Connection> connectionPool;
     private List<Connection> usedConnections = new ArrayList<>();
     private final int POOL_SIZE = 10;
+    private static DataSource instance;
+    private String url;
+    private String login;
+    private String password;
+
 
     static {
         try {
@@ -22,8 +27,18 @@ public class DataSource implements ConnectionPool {
         }
     }
 
+    public static DataSource getInstance() {
+        if(instance == null) {
+            instance = new DataSource();
+        }
+        return instance;
+    }
 
-    public DataSource () {
+
+    private DataSource () {
+        url = System.getenv("host-url");
+        login = System.getenv("login");
+        password = System.getenv("password");
         connectionPool = new ArrayList<>(POOL_SIZE);
         try {
             for (int i = 0; i < POOL_SIZE; i++){
@@ -63,25 +78,35 @@ public class DataSource implements ConnectionPool {
     }
 
     private Connection createConnection() throws SQLException {
-        return DriverManager.getConnection(
-                System.getenv("host-url"),
-                System.getenv("login"),
-                System.getenv("password")
-        );
+        return DriverManager.getConnection(url, login, password);
     }
 
     public int getSize() {
         return connectionPool.size() + usedConnections.size();
     }
 
-    //TODO make this work without throwing a ConcurrentModificationException
-    /*
-    public void shutdown() throws SQLException {
-        usedConnections.forEach(this::releaseConnection);
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void shutdown() throws SQLException {
+        for(int i = usedConnections.size() - 1; i == -1; i--) {
+            if (usedConnections.get(i).isValid(1)) {
+                this.releaseConnection(usedConnections.get(i));
+            }
+        }
         for (Connection c: connectionPool) {
             c.close();
         }
         connectionPool.clear();
-    } */
+    }
+
 }
