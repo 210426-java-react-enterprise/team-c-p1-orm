@@ -9,18 +9,18 @@ import java.util.ArrayList;
 @Entity (name = "app_user")
 public class AppUser {
 
-    @Id
-    @Column(name = "user_id")
+    @Id(name = "user_id")
+    @Column(name = "user_id", dataType = "int")
     private int id;
-    @Column(name ="username")
+    @Column(name ="username", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
     private  String username;
-    @Column(name ="password")
+    @Column(name ="password", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
     private String password;
-    @Column(name ="firstName")
+    @Column(name ="first_name", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
     private String firstName;
-    @Column(name ="lastName")
+    @Column(name ="last_name", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
     private String lastName;
-    @Column(name ="email")
+    @Column(name ="email", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
     private String email;
     private ArrayList<AppAccount> accounts = new ArrayList<AppAccount>();
 

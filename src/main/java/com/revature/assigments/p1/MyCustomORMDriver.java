@@ -1,17 +1,17 @@
 package com.revature.assigments.p1;
 
 import com.revature.assigments.p1.annotations.Entity;
+import com.revature.assigments.p1.models.AppUser;
 import com.revature.assigments.p1.repos.ClassDAO;
 import com.revature.assigments.p1.repos.ConnectionsController;
 import com.revature.assigments.p1.services.ClassService;
-import com.revature.assigments.p1.util.ClassReader;
+import com.revature.assigments.p1.util.ObjectReader;
 import com.revature.assigments.p1.util.PackagesReader;
 
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class MyCustomORMDriver {
 
@@ -20,13 +20,13 @@ public class MyCustomORMDriver {
         ClassDAO classDAO = new ClassDAO();
         ConnectionsController connectionsController = new ConnectionsController();
         ClassService classService = new ClassService(classDAO, connectionsController);
-
+        /*
         try{
             String packageName = "com.revature.assigments.p1.models";
             List<Class<?>> entityClassesWithConstraints = PackagesReader.getClassesInPackageWithConstraints(packageName, clazz -> clazz.isAnnotationPresent(Entity.class));
             for(Class<?>  entityWithConstraints : entityClassesWithConstraints ){
                 System.out.println(entityWithConstraints);
-                List<Annotation> annotationsList = Arrays.asList(new ClassReader().readEntity(entityWithConstraints));
+                List<Annotation> annotationsList = Arrays.asList(new ObjectReader().readEntity(entityWithConstraints));
                 classService.saveClass(entityWithConstraints);
             }
         } catch (MalformedURLException e) {
@@ -36,6 +36,15 @@ public class MyCustomORMDriver {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        */
+
+        List<Map<?,?>> objectMapped = new ArrayList<>();
+
+        AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
+        appUser.setId(1);
+        objectMapped.add(ObjectReader.mapEntity(appUser));
+
+
 
         //connectionsController.closeConnections();
 
