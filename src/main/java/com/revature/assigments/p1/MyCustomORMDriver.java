@@ -37,6 +37,8 @@ public class MyCustomORMDriver {
             throwables.printStackTrace();
         }
 
+        //connectionsController.closeConnections();
+
     }
 
 

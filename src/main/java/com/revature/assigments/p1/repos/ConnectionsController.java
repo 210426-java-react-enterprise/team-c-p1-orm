@@ -28,4 +28,14 @@ public class ConnectionsController {
         return connectionsPool.add(conn);
     }
 
+    public void closeConnections(){
+       connectionsPool.forEach( conn -> {
+           try {
+               conn.close();
+           } catch (SQLException throwables) {
+               throwables.printStackTrace();
+           }
+       });
+    }
+
 }
