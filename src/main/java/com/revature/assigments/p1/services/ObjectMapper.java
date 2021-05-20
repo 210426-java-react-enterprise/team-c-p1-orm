@@ -3,6 +3,7 @@ package com.revature.assigments.p1.services;
 import com.revature.assigments.p1.annotations.Column;
 import com.revature.assigments.p1.annotations.Entity;
 import com.revature.assigments.p1.annotations.Id;
+import com.revature.assigments.p1.annotations.Table;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -12,21 +13,38 @@ import java.util.stream.Collectors;
 
 public class ObjectMapper {
 
+    private static final String tableValue = "TABLE";
+    private static final String idValue = "ID";
 
+    /**
+     * This method is responsible to read the all the object's annotations to mapped them into  Map
+     *      MAP<Key,Value>
+     *          -Key = Annotation's Element Name (for the @Table and @Id this value is replace with a their respective constant value)
+     *          -Value = ArrayList of rest of annotation's elements
+     *
+     * @param object -- The respective object to read
+     * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
+     */
     public static Map<?,?>createObjetMap(Object object){
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
-        
+        Map<String,ArrayList<String>> objectMap = new TreeMap<String,ArrayList<String>>();
+        String key;
 
 
-        queryCToCreateObjectInDB.append("insert into ");
-
-        if(!objectClass.isAnnotationPresent(Entity.class)){
-            throw new RuntimeException(objectClass.getName() + " >> doesn't contain any @Entity annotation");
+        //1.- Ensure that the respective object contains @Entity
+        if(!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)){
+            throw new RuntimeException(objectClass.getName() + " >> This object must contains @Entity and @Table");
         }
 
-        queryCreateObjectInDB.add(objectClass.getAnnotation(Entity.class).name());
+        //2.-Adding the table name to the Map
+        key = tableValue;
 
-        Field[] objectClassFields = objectClass.getDeclaredFields();
+        ArrayList<String> valuetableArray = new ArrayList<>();
+        valuetableArray.add(objectClass.getAnnotation(Table.class).name());
+        objectMap.put(key,valuetableArray);
+
+        //3.-Adding the table id to the Map
+  /*      Field[] objectClassFields = objectClass.getDeclaredFields();
         for(Field field : objectClassFields){
             field.setAccessible(true);
             Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
@@ -35,18 +53,20 @@ public class ObjectMapper {
 
                 }
                 if(field.isAnnotationPresent(Column.class)){
-                    objectMap.put("Column",field.getAnnotation(Column.class).)
+                    objectMap.put("Column",field.getAnnotation(Column.class));
                 }
 
 
             }
 
             field.setAccessible(false);
-        }
+        }*/
 
+        //4.-Adding table columns to the Map
+
+        //5.-Returning the Map
 
         return objectMap;
-
     }
 
 

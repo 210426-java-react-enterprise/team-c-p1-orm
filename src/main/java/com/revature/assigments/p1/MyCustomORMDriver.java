@@ -37,7 +37,7 @@ public class MyCustomORMDriver {
 
         AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
         appUser.setId(1);
-        objectMapped.add(ObjectMapper.mapEntity(appUser));
+        objectMapped.add(ObjectMapper.createObjetMap(appUser));
 
 
 

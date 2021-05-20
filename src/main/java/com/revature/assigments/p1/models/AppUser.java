@@ -3,24 +3,26 @@ package com.revature.assigments.p1.models;
 import com.revature.assigments.p1.annotations.Column;
 import com.revature.assigments.p1.annotations.Entity;
 import com.revature.assigments.p1.annotations.Id;
+import com.revature.assigments.p1.annotations.Table;
 
 import java.util.ArrayList;
 
-@Entity (name = "app_user")
+@Entity ()
+@Table(name = "user_app")
 public class AppUser {
 
     @Id(name = "user_id")
     @Column(name = "user_id", dataType = "int")
     private int id;
-    @Column(name ="username", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
+    @Column(name ="username", dataType = "varchar(256)", unique = "true", notNull = "true" )
     private  String username;
-    @Column(name ="password", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
+    @Column(name ="password", dataType = "varchar(256)", unique = "true", notNull = "true" )
     private String password;
-    @Column(name ="first_name", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
+    @Column(name ="first_name", dataType = "varchar(256)", unique = "true", notNull = "true" )
     private String firstName;
-    @Column(name ="last_name", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
+    @Column(name ="last_name", dataType = "varchar(256)", unique = "true", notNull = "true" )
     private String lastName;
-    @Column(name ="email", dataType = "varchar(256)", constraint_U = "true", constraint_NN = "true" )
+    @Column(name ="email", dataType = "varchar(256)", unique = "true", notNull = "true" )
     private String email;
     private ArrayList<AppAccount> accounts = new ArrayList<AppAccount>();
 
