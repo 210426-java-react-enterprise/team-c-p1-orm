@@ -33,11 +33,11 @@ public class MyCustomORMDriver {
         }
         */
 
-        List<Map<?,?>> objectMapped = new ArrayList<>();
+        TreeMap<String,ArrayList<String>> objectMapped;
 
         AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
         appUser.setId(1);
-        objectMapped.add(ObjectMapper.createObjetMap(appUser));
+        objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMap(appUser);
 
 
 

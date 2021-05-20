@@ -5,6 +5,7 @@ import com.revature.assigments.p1.annotations.Entity;
 import com.revature.assigments.p1.annotations.Id;
 import com.revature.assigments.p1.annotations.Table;
 
+import javax.sql.rowset.spi.SyncProvider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -39,28 +40,45 @@ public class ObjectMapper {
         //2.-Adding the table name to the Map
         key = tableValue;
 
-        ArrayList<String> valuetableArray = new ArrayList<>();
-        valuetableArray.add(objectClass.getAnnotation(Table.class).name());
-        objectMap.put(key,valuetableArray);
+        ArrayList<String> valueTableArray = new ArrayList<>();
+        valueTableArray.add(objectClass.getAnnotation(Table.class).name());
+        objectMap.put(key,valueTableArray);
 
-        //3.-Adding the table id to the Map
-  /*      Field[] objectClassFields = objectClass.getDeclaredFields();
+       //Iterating the fields to get the annotations
+        Field[] objectClassFields = objectClass.getDeclaredFields();
         for(Field field : objectClassFields){
             field.setAccessible(true);
             Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
             for(Annotation annotation : fieldAnnotations){
+                //3.-Adding the table id to the Map (this is optional)
                 if (field.isAnnotationPresent(Id.class)){
+                    key = idValue;
+                    ArrayList<String> valueIdArray = new ArrayList<>();
+                    valueIdArray.add(field.getAnnotation(Id.class).name());
+                    objectMap.put(key, valueIdArray);
+                }
+                if(!field.isAnnotationPresent(Column.class)){
+                    throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
+                }
+                ArrayList<String> supportArray = new ArrayList<>();
+                key = field.getAnnotation(Column.class).name();
+                supportArray.add(field.getAnnotation(Column.class).dataType());
+                supportArray.add(field.getAnnotation(Column.class).unique());
+                supportArray.add(field.getAnnotation(Column.class).notNull());
 
-                }
-                if(field.isAnnotationPresent(Column.class)){
-                    objectMap.put("Column",field.getAnnotation(Column.class));
-                }
+                objectMap.put(key ,(ArrayList)supportArray.clone());
+                supportArray.clear();
+
+               objectMap.get(key).forEach((String str) -> {
+                   System.out.println(str);
+               });
+
 
 
             }
 
             field.setAccessible(false);
-        }*/
+        }
 
         //4.-Adding table columns to the Map
 
