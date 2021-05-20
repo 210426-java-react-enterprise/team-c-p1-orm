@@ -19,6 +19,7 @@ public class ObjectMapper {
 
     /**
      * This method is responsible to read the all the object's annotations to mapped them into  Map
+     *      The returned map will be use to crate the @Entity table in DB
      *      MAP<Key,Value>
      *          -Key = Annotation's Element Name (for the @Table and @Id this value is replace with a their respective constant value)
      *          -Value = ArrayList of rest of annotation's elements
@@ -27,6 +28,7 @@ public class ObjectMapper {
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
     public static Map<?,?>createObjetMap(Object object){
+
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
         Map<String,ArrayList<String>> objectMap = new TreeMap<String,ArrayList<String>>();
         String key;
@@ -57,6 +59,7 @@ public class ObjectMapper {
                     valueIdArray.add(field.getAnnotation(Id.class).name());
                     objectMap.put(key, valueIdArray);
                 }
+                //4.-Adding table columns to the Map
                 if(!field.isAnnotationPresent(Column.class)){
                     throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
                 }
@@ -69,40 +72,49 @@ public class ObjectMapper {
                 objectMap.put(key ,(ArrayList)supportArray.clone());
                 supportArray.clear();
 
-               objectMap.get(key).forEach((String str) -> {
+                // How to access the Array inside my map
+               /*objectMap.get(key).forEach((String str) -> {
                    System.out.println(str);
-               });
-
-
+               });*/
 
             }
 
             field.setAccessible(false);
         }
 
-        //4.-Adding table columns to the Map
-
         //5.-Returning the Map
 
         return objectMap;
     }
 
+    /**
+     * This method is responsible to read the all the object's annotations to mapped them into  Map
+     *      The returned map will be use to insert the current values in memory to the @Entity table in DB
+     *      MAP<Key,Value>
+     *          -Key = Annotation's Element Name (for the @Table and @Id this value is replace with a their respective constant value)
+     *          -Value = ArrayList of rest of annotation's elements
+     *
+     * @param object -- The respective object to read
+     * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
+     */
+    public static Map<?,?>createInstanceMap(Object object){
 
+        Class<?> objectClass = Objects.requireNonNull(object.getClass());
+        Map<String,String> instanceMap = new TreeMap<String,String>();
+        String key;
+        String value;
 
-    /*
-    public Annotation[] readEntity(Object 0){
-        Annotation[] classAnnotations = clazz.getDeclaredAnnotations();
-        List<Annotation> fieldAnnotations = new ArrayList<>();
-        List<Annotation> fieldAnnotations.stream().filter(Annotation -> fieldAnnotations.equals(Entity.class)).collect(Collectors.toList());
-        for(Annotation annotation: classAnnotations){
-            System.out.println(annotation.annotationType().getName());
-            List<Field> classFields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
-            for(Field field : classFields){
-                fieldAnnotations.add(field.getDeclaredAnnotation(Column.class));
-            }
+        //1.- Ensure that the respective object contains @Entity
 
-        }
-        return classAnnotations;
+        //2.-Adding the object name to the Map
+
+        //Iterating the fields to get the annotations
+
+        //4.-Adding table columns to the Map
+
+        //5.-Returning the Map
+
+        return instanceMap;
     }
-    */
+
 }
