@@ -1,16 +1,11 @@
 package com.revature.assigments.p1;
 
-import com.revature.assigments.p1.annotations.Entity;
 import com.revature.assigments.p1.models.AppUser;
 import com.revature.assigments.p1.repos.ClassDAO;
 import com.revature.assigments.p1.repos.ConnectionsController;
 import com.revature.assigments.p1.services.ClassService;
-import com.revature.assigments.p1.util.ObjectReader;
-import com.revature.assigments.p1.util.PackagesReader;
+import com.revature.assigments.p1.services.ObjectMapper;
 
-import java.lang.annotation.Annotation;
-import java.net.MalformedURLException;
-import java.sql.SQLException;
 import java.util.*;
 
 public class MyCustomORMDriver {
@@ -42,7 +37,7 @@ public class MyCustomORMDriver {
 
         AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
         appUser.setId(1);
-        objectMapped.add(ObjectReader.mapEntity(appUser));
+        objectMapped.add(ObjectMapper.mapEntity(appUser));
 
 
 

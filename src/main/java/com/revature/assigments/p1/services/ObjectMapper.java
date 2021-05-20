@@ -1,4 +1,4 @@
-package com.revature.assigments.p1.util;
+package com.revature.assigments.p1.services;
 
 import com.revature.assigments.p1.annotations.Column;
 import com.revature.assigments.p1.annotations.Entity;
@@ -10,19 +10,21 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ObjectReader {
+public class ObjectMapper {
 
 
-    public static ArrayList<ArrayList<Map<String,String>>> objectMap(Object object){
+    public static Map<?,?>createObjetMap(Object object){
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
-        List<?> objectMap = new ArrayList<ArrayList<>>();
+        
 
+
+        queryCToCreateObjectInDB.append("insert into ");
 
         if(!objectClass.isAnnotationPresent(Entity.class)){
             throw new RuntimeException(objectClass.getName() + " >> doesn't contain any @Entity annotation");
         }
 
-        objectMap.put("Entity", objectClass.getAnnotation(Entity.class).name());
+        queryCreateObjectInDB.add(objectClass.getAnnotation(Entity.class).name());
 
         Field[] objectClassFields = objectClass.getDeclaredFields();
         for(Field field : objectClassFields){
@@ -30,7 +32,7 @@ public class ObjectReader {
             Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
             for(Annotation annotation : fieldAnnotations){
                 if (field.isAnnotationPresent(Id.class)){
-                    objectMap.put("Id", field.getAnnotation(Id.class).name());
+
                 }
                 if(field.isAnnotationPresent(Column.class)){
                     objectMap.put("Column",field.getAnnotation(Column.class).)
@@ -44,6 +46,7 @@ public class ObjectReader {
 
 
         return objectMap;
+
     }
 
 
