@@ -153,13 +153,56 @@ public class ObjectMapper {
             }
 
             field.setAccessible(false);
-
-
-
         }
 
         //5.-Returning the Map
         return instanceMap;
     }
+
+    /**
+     * This method is responsible to read all the fields from an object to build query's fields sequence
+     *
+     * @param object -- The respective object to read
+     * @return ArrayList<String> with the sequence
+     */
+    public static ArrayList<String> objectFieldSequence(Object object){
+
+        Class<?> objectClass = Objects.requireNonNull(object.getClass());
+
+        //1.- Ensure that the respective object contains @Entity
+        if (!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)) {
+            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
+        }
+        ArrayList<String> sequence = new ArrayList<String>();
+
+        //Iterating the fields to get the annotations
+        Field[] objectClassFields = objectClass.getDeclaredFields();
+        for (Field field : objectClassFields) {
+            field.setAccessible(true);
+            Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+            for (Annotation annotation : fieldAnnotations) {
+                //2.-Adding @Column to the sequence
+
+                if (!field.isAnnotationPresent(Column.class)) {
+                    throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
+                }
+
+                String[] support = String.valueOf(annotation).split("\\.");
+                int supportPos = (support.length)-1;
+                String str = String.valueOf(support[supportPos].subSequence(0,2));
+                String strComp = "Id";
+                if(!str.equals(strComp)){
+                    sequence.add(field.getAnnotation(Column.class).name());
+                }
+            }
+
+            field.setAccessible(false);
+        }
+
+        //3.-Returning the ArrayList
+
+        return sequence;
+    }
+
 
 }
