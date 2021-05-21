@@ -1,4 +1,4 @@
-package com.revature.assigments.p1.services;
+package com.revature.assigments.p1.util;
 
 import com.revature.assigments.p1.annotations.Column;
 import com.revature.assigments.p1.annotations.Entity;

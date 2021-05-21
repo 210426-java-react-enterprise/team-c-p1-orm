@@ -1,27 +1,41 @@
 package com.revature.assigments.p1.services;
 
 import com.revature.assigments.p1.repos.ClassDAO;
-import com.revature.assigments.p1.repos.ConnectionsController;
+import com.revature.assigments.p1.repos.ConnectionPool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class ClassService {
     private ClassDAO classDao;
-    private ConnectionsController connectionsController;
+    private ConnectionPool connectionPool;
 
 
-    public ClassService(ClassDAO classDao, ConnectionsController connectionsController) {
+    public ClassService(ClassDAO classDao, ConnectionPool connectionPool) {
         this.classDao = classDao;
-        this.connectionsController = connectionsController;
+        this.connectionPool = connectionPool;
     }
 
-    public boolean saveClass(Class<?> newClassToBeSaved) throws SQLException {
-        Connection conn  = connectionsController.pollFromConnectionPool();
-        classDao.saveClass(newClassToBeSaved, conn);
+    
+    public boolean sendInstanceToDB(ArrayList<String> objectMapSequence, TreeMap<String, ArrayList<String>> objectMapped, TreeMap<String, ArrayList<String>> instanceMapped) {
+        
+        Connection conn = null;
 
-        connectionsController.addToConnectionPool(conn);
-        return true;
+        try {
+            conn = connectionPool.pollFromConnectionPool();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        classDao.saveInstance(conn, objectMapSequence, objectMapped, instanceMapped);
+
+
+        //connectionPool.addToConnectionPool();
+        //return true;
+
+
+        return false;
     }
-
 }

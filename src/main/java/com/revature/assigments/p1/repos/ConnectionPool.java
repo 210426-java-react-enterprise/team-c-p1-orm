@@ -8,15 +8,15 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Predicate;
 
-public class ConnectionsController {
+public class ConnectionPool{
     private final int NUMOFCONNECTIONS =2;
-    private Queue<Connection> connectionsPool = new LinkedList<>(ConnectionFactory.getInstance().getPoolOfConnectionsAsQueue(NUMOFCONNECTIONS));
+    private Queue<Connection> connections = new LinkedList<>(ConnectionFactory.getInstance().getPoolOfConnectionsAsQueue(NUMOFCONNECTIONS));
 
     public Connection pollFromConnectionPool() throws SQLException {
         Connection conn=null;
 
-        if(connectionsPool.peek()!=null){
-            conn = connectionsPool.poll();
+        if(connections.peek()!=null){
+            conn = connections.poll();
         }else{
             throw new SQLException("No connection available!!!");
         }
@@ -25,11 +25,11 @@ public class ConnectionsController {
     }
 
     public boolean addToConnectionPool(Connection conn){
-        return connectionsPool.add(conn);
+        return connections.add(conn);
     }
 
     public void closeConnections(){
-       connectionsPool.forEach( conn -> {
+       connections.forEach( conn -> {
            try {
                conn.close();
            } catch (SQLException throwables) {

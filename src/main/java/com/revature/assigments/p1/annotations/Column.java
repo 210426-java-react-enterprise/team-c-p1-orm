@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 public @interface Column {
     String name() default "";
     String dataType() default "";
-    String unique() default "false";
-    String notNull() default "false";
+    String unique() default "";
+    String notNull() default "";
     
 }

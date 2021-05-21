@@ -2,9 +2,9 @@ package com.revature.assigments.p1;
 
 import com.revature.assigments.p1.models.AppUser;
 import com.revature.assigments.p1.repos.ClassDAO;
-import com.revature.assigments.p1.repos.ConnectionsController;
+import com.revature.assigments.p1.repos.ConnectionPool;
 import com.revature.assigments.p1.services.ClassService;
-import com.revature.assigments.p1.services.ObjectMapper;
+import com.revature.assigments.p1.util.ObjectMapper;
 
 import java.util.*;
 
@@ -13,7 +13,7 @@ public class MyCustomORMDriver {
     public static void main(String[] args){
 
         ClassDAO classDAO = new ClassDAO();
-        ConnectionsController connectionsController = new ConnectionsController();
+        ConnectionPool connectionsController = new ConnectionPool();
         ClassService classService = new ClassService(classDAO, connectionsController);
         /*
         try{
@@ -43,6 +43,7 @@ public class MyCustomORMDriver {
         objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(appUser);
         objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(appUser);
         instanceMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(appUser);
+        classService.sendInstanceToDB(objectMapSequence,objectMapped,instanceMapped);
 
 
 
