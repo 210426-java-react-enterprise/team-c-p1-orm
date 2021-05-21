@@ -34,10 +34,13 @@ public class MyCustomORMDriver {
         */
 
         TreeMap<String,ArrayList<String>> objectMapped;
+        TreeMap<String,ArrayList<String>> instanceMapped;
 
         AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
         appUser.setId(1);
-        objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMap(appUser);
+        //I need to include a method map the fields sequence to build the DB table
+        objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(appUser);
+        instanceMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(appUser);
 
 
 

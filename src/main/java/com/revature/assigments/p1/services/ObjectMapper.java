@@ -16,6 +16,7 @@ public class ObjectMapper {
 
     private static final String tableValue = "TABLE";
     private static final String idValue = "ID";
+    private static final String objectValue ="OBJECT";
 
     /**
      * This method is responsible to read the all the object's annotations to mapped them into  Map
@@ -27,49 +28,52 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static Map<?,?>createObjetMap(Object object){
+    public static Map<?,?>createObjetMapForDB(Object object) {
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
-        Map<String,ArrayList<String>> objectMap = new TreeMap<String,ArrayList<String>>();
-        String key;
-
 
         //1.- Ensure that the respective object contains @Entity
-        if(!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)){
-            throw new RuntimeException(objectClass.getName() + " >> This object must contains @Entity and @Table");
+        if (!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)) {
+            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
         }
+
+        Map<String, ArrayList<String>> objectMap = new TreeMap<String, ArrayList<String>>();
+        String key;
+        ArrayList<String> supportArray = new ArrayList<>();
 
         //2.-Adding the table name to the Map
         key = tableValue;
 
-        ArrayList<String> valueTableArray = new ArrayList<>();
-        valueTableArray.add(objectClass.getAnnotation(Table.class).name());
-        objectMap.put(key,valueTableArray);
+        supportArray.add(objectClass.getAnnotation(Table.class).name());
+        objectMap.put(key, (ArrayList) supportArray.clone());
+        supportArray.clear();
 
-       //Iterating the fields to get the annotations
+        //Iterating the fields to get the annotations
         Field[] objectClassFields = objectClass.getDeclaredFields();
-        for(Field field : objectClassFields){
+        for (Field field : objectClassFields) {
             field.setAccessible(true);
             Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
-            for(Annotation annotation : fieldAnnotations){
+            for (Annotation annotation : fieldAnnotations) {
                 //3.-Adding the table id to the Map (this is optional)
-                if (field.isAnnotationPresent(Id.class)){
+
+                if (field.isAnnotationPresent(Id.class)) {
                     key = idValue;
-                    ArrayList<String> valueIdArray = new ArrayList<>();
-                    valueIdArray.add(field.getAnnotation(Id.class).name());
-                    objectMap.put(key, valueIdArray);
+
+                    supportArray.add(field.getAnnotation(Id.class).name());
+                    objectMap.put(key, (ArrayList) supportArray.clone());
+                    supportArray.clear();
                 }
                 //4.-Adding table columns to the Map
-                if(!field.isAnnotationPresent(Column.class)){
+                if (!field.isAnnotationPresent(Column.class)) {
                     throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
                 }
-                ArrayList<String> supportArray = new ArrayList<>();
+
                 key = field.getAnnotation(Column.class).name();
                 supportArray.add(field.getAnnotation(Column.class).dataType());
                 supportArray.add(field.getAnnotation(Column.class).unique());
                 supportArray.add(field.getAnnotation(Column.class).notNull());
 
-                objectMap.put(key ,(ArrayList)supportArray.clone());
+                objectMap.put(key, (ArrayList) supportArray.clone());
                 supportArray.clear();
 
                 // How to access the Array inside my map
@@ -85,8 +89,8 @@ public class ObjectMapper {
         //5.-Returning the Map
 
         return objectMap;
-    }
 
+    }
     /**
      * This method is responsible to read the all the object's annotations to mapped them into  Map
      *      The returned map will be use to insert the current values in memory to the @Entity table in DB
@@ -97,23 +101,64 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static Map<?,?>createInstanceMap(Object object){
+    public static Map<?,?>createInstanceMapForDB(Object object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
-        Map<String,String> instanceMap = new TreeMap<String,String>();
-        String key;
-        String value;
 
         //1.- Ensure that the respective object contains @Entity
+        if(!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)){
+            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
+        }
 
-        //2.-Adding the object name to the Map
+        Map<String,ArrayList<String>> instanceMap = new TreeMap<String,ArrayList<String>>();
+        String key;
+        ArrayList<String> supportArray = new ArrayList<>();
 
-        //Iterating the fields to get the annotations
+        //2.-Adding the instance name to the Map
+        key = objectValue;
 
-        //4.-Adding table columns to the Map
+        supportArray.add(objectClass.getAnnotation(Table.class).name());
+        instanceMap.put(key ,(ArrayList)supportArray.clone());
+
+
+        //Iterating the fields to get their values
+        Field[] objectClassFields = objectClass.getDeclaredFields();
+        for(Field field : objectClassFields) {
+            field.setAccessible(true);
+            Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+            for (Annotation annotation : fieldAnnotations) {
+                //3.-Adding table columns to the Map
+
+                if (!field.isAnnotationPresent(Column.class)) {
+                    throw new RuntimeException(objectClass.getName() + " >> This instance must contains @Column to be able to mapped into a DB");
+                }
+
+                key = field.getAnnotation(Column.class).name();
+                supportArray.add(field.getType().getTypeName());
+                try{
+                    supportArray.add(field.get(object).toString());
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+
+
+                instanceMap.put(key, (ArrayList) supportArray.clone());
+                supportArray.clear();
+
+                // How to access the Array inside my map
+               /*objectMap.get(key).forEach((String str) -> {
+                   System.out.println(str);
+               });*/
+
+            }
+
+            field.setAccessible(false);
+
+
+
+        }
 
         //5.-Returning the Map
-
         return instanceMap;
     }
 
