@@ -50,3 +50,5 @@ Additionally, you will need to build a simple CRUD web application (what objects
 - [Hibernate Documentation](https://hibernate.org/orm/documentation/5.4/)
 - [JavaLite ActiveJDBC Documentation](https://javalite.io/documentation)
 - [Using Java Reflection](https://www.oracle.com/technical-resources/articles/java/javareflection.html)
+
+
