@@ -16,11 +16,11 @@ public class AppUser {
     @Key
     @Column
     private int userID;
-    @Column
+    @Column(nullable = false)
     private String userName;
-    @Column
+    @Column(nullable = false)
     private String password;
-    @Column
+    @Column(nullable = false)
     private String email;
     @Column(name = "first_name")
     private String firstName;

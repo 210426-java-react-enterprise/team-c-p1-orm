@@ -86,7 +86,7 @@ public class QueryBuilder {
         String primaryFieldName = fieldName.isEmpty() ? getPrimaryField(clazz).getName().toLowerCase(Locale.ROOT) : fieldName;
 
         sb.append("select * from ").append(entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName)
-        .append(" where ").append(primaryFieldName).append(" = ").append(id).append(";");
+                .append(" where ").append(primaryFieldName).append(" = ").append(id).append(";");
 
         try {
             return connection.prepareStatement(sb.toString());
@@ -96,11 +96,11 @@ public class QueryBuilder {
         return null;
     }
 
-    public <T> PreparedStatement createUpdateQueryFromObject (T object, Connection connection) throws IllegalAccessException {
+    public <T> PreparedStatement createUpdateQueryFromObject(T object, Connection connection) throws IllegalAccessException {
         StringBuilder sb = new StringBuilder();
         Class<?> clazz = Objects.requireNonNull(object.getClass());
 
-        if(!clazz.isAnnotationPresent(Entity.class))
+        if (!clazz.isAnnotationPresent(Entity.class))
             throw new IllegalArgumentException(clazz.getName() + " is not an Entity!");
 
         String entityName = clazz.getAnnotation(Entity.class).name();
@@ -109,8 +109,8 @@ public class QueryBuilder {
         String primaryFieldName = keyFieldName.isEmpty() ? getPrimaryField(clazz).getName().toLowerCase(Locale.ROOT) : keyFieldName;
 
         sb.append("update ").append(tableName).append(" set ");
-        for (Field field: clazz.getDeclaredFields()) {
-            if(field.isAnnotationPresent(Column.class)) {
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.isAnnotationPresent(Column.class)) {
                 if (field.isAnnotationPresent(Key.class))
                     continue;
 
@@ -123,7 +123,7 @@ public class QueryBuilder {
             }
         }
         sb.deleteCharAt(sb.lastIndexOf(","));
-        sb.append("where ").append(primaryFieldName).append( " = ").append(getPrimaryKey(object)).append(";");
+        sb.append("where ").append(primaryFieldName).append(" = ").append(getPrimaryKey(object)).append(";");
 
         try {
             return connection.prepareStatement(sb.toString());
@@ -157,6 +157,25 @@ public class QueryBuilder {
         return null;
     }
 
+    public <T> String createTableFromObject(Class<?> clazz) {
+        StringBuilder sb = new StringBuilder();
+        Objects.requireNonNull(clazz);
+
+        if (!clazz.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(clazz.getName() + " is not an Entity");
+
+        String entityName = clazz.getAnnotation(Entity.class).name();
+        String tableName = entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName;
+
+        sb.append("create table ").append(tableName).append(" ( \n");
+        Arrays.stream(clazz.getDeclaredFields()).forEach(field -> sb.append(getFieldName(field)).append(" ")
+                .append(getSQLType(field)).append(!field.getAnnotation(Column.class).nullable() ? " not null, \n" : ", \n"));
+        sb.append("primary key ").append(getFieldName(getPrimaryField(clazz))).append(",\n);"); //will implement foreign keys later (maybe)
+        sb.deleteCharAt(sb.lastIndexOf(","));
+
+        return sb.toString();
+    }
+
 
     @SuppressWarnings("unchecked")
     private <T> T getPrimaryKey(T object) throws IllegalAccessException {
@@ -179,5 +198,36 @@ public class QueryBuilder {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("This entity does not have a primary key"));
     }
+
+    private <T> String getFieldName(Field field) {
+        // so don't have to type out this ternary every time
+        return field.getAnnotation(Column.class).name().isEmpty()
+                ? field.getName().toLowerCase(Locale.ROOT) :
+                field.getAnnotation(Column.class).name();
+    }
+
+    private String getSQLType(Field field) {
+        switch (field.getType().getSimpleName()) {
+            case "int":
+                return SQLTypes.INT.toString();
+            case "double":
+                return SQLTypes.DOUBLE.toString();
+            case "long":
+                return SQLTypes.LONG.toString();
+            case "String":
+                return SQLTypes.STRING.toString();
+            case "boolean":
+                return SQLTypes.BOOLEAN.toString();
+            case "character":
+                return SQLTypes.CHARACTER.toString();
+            case "BigDecimal":
+                return SQLTypes.BIGDECIMAL.toString();
+            case "LocalDateTime":
+                return SQLTypes.LOCALDATETIME.toString();
+            default:
+                return null;
+        }
+    }
+
 
 }

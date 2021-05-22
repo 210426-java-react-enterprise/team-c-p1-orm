@@ -2,11 +2,17 @@ package com.revature.p1.utils;
 
 import com.revature.p1.repos.DataSource;
 import com.revature.p1.utils.annotations.Column;
+import jdk.nashorn.internal.objects.annotations.Where;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class EntityManager {
 
@@ -72,7 +78,6 @@ public class EntityManager {
             Connection connection = DataSource.getInstance().getConnection();
             PreparedStatement stmt = queryBuilder.prepareInsertQueryFromObject(object, connection);
             stmt.executeUpdate();
-            DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
