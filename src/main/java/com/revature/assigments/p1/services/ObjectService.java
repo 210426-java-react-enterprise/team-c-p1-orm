@@ -30,13 +30,14 @@ public class ObjectService {
             System.out.println(e.getMessage());
         }
         
-        objectDao.saveInstance(conn, objectMapSequence, objectMapped, instanceMapped);
+        if(!objectDao.saveInstance(conn, objectMapSequence, objectMapped, instanceMapped)){
+            connectionPool.addToConnectionPool(conn);
+            return false;
+        }
 
-
-        //connectionPool.addToConnectionPool();
-        //return true;
-
-
-        return false;
+        connectionPool.addToConnectionPool(conn);
+        return true;
     }
+
+
 }

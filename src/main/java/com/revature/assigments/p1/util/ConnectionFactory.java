@@ -14,8 +14,7 @@ import java.util.*;
 public class ConnectionFactory {
 
     private static ConnectionFactory connectionFactory; // Lazy Singleton
-    //private List<Properties> propsPool = new ArrayList<>(); //For several credentials
-    private Properties props = new Properties(); //One credential
+    private Properties props = new Properties();
 
     static{
         try{
@@ -24,25 +23,6 @@ public class ConnectionFactory {
             e.printStackTrace();
         }
     }
-
-    //I comment this block because I don't need several credentials to work with a connectionPool
-    /*
-    private ConnectionFactory(int numOfConnections){
-        Properties props = new Properties();
-        try{
-            for (int i = 0; i < numOfConnections; i++) {
-                String filePath = "src/main/resources/connections/application_conn_"+ i +".properties";
-                props.load(new FileReader(filePath));
-                propsPool.add(props);
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
 
     private ConnectionFactory(){
 
@@ -67,27 +47,7 @@ public class ConnectionFactory {
         return connectionFactory;
     }
 
-    //I commented this block because is working with several Credentials
-    /*
-    public List<Connection> getPoolOfConnections(int numOfConnections){
-        List<Connection> conns = new ArrayList<>();
-        Connection conn = null;
-        try{
-
-            for(Properties props : propsPool){
-                conn = DriverManager.getConnection(props.getProperty("host-url"),props.getProperty("username"), props.getProperty("password"));
-                conns.add(conn);
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return conns;
-    }
-    */
-
-    public Queue<Connection> getPoolOfConnectionsAsQueue(int numOfConnections){
+    public Queue<Connection> getConnections(int numOfConnections){
         Queue<Connection> conns = new LinkedList<>();
         Connection conn=null;
         try{
@@ -95,7 +55,6 @@ public class ConnectionFactory {
                 conn = DriverManager.getConnection(props.getProperty("host-url"),props.getProperty("username"), props.getProperty("password"));
                 conns.add(conn);
             }
-
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

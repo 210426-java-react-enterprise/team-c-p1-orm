@@ -13,7 +13,7 @@ public class MyCustomORMDriver {
     public static void main(String[] args){
 
         ObjectDAO objectDAO = new ObjectDAO();
-        ConnectionPool connectionPool = new ConnectionPool();
+        ConnectionPool connectionPool = ConnectionPool.getConnectionPool();
         ObjectService objectService = new ObjectService(objectDAO, connectionPool);
         /*
         try{
@@ -43,11 +43,13 @@ public class MyCustomORMDriver {
         objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(appUser);
         objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(appUser);
         instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(appUser);
-        objectService.sendInstanceToDB(objectMapSequence,objectMapped,instanceMapped);
+        if(!objectService.sendInstanceToDB(objectMapSequence,objectMapped,instanceMapped)){
+            System.out.println("The object COULDN'T be saved into DB");
+        }else{
+            System.out.println("The object was SAVED into DB");
+        }
 
-
-
-        //connectionsController.closeConnections();
+        connectionPool.closeConnections();
 
     }
 
