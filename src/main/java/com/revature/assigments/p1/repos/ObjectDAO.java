@@ -9,11 +9,11 @@ import java.sql.SQLException;
 import java.util.*;
 
 
-public class ClassDAO {
+public class ObjectDAO {
 
     public boolean saveInstance(Connection conn, ArrayList<String> objectMapSequence,
                                 TreeMap<String, ArrayList<String>> objectMapped,
-                                TreeMap<String, ArrayList<String>> instanceMapped){
+                                HashMap<String, ArrayList<String>> instanceMapped){
 
         //1.-Check if @Entity table is in the DB >> Select * from @Entity
 
@@ -57,16 +57,16 @@ public class ClassDAO {
         //3.1.-Build insert query
         StringBuilder insertTableQuery = new StringBuilder("insert");
 
-        insertTableQuery.append(" into table "+objectMapped.get("TABLE").get(0)+" (");
+        insertTableQuery.append(" into "+objectMapped.get("TABLE").get(0)+" (");
         for (String fieldKey: objectMapSequence){
             insertTableQuery.append(fieldKey+", ");
         }
-        insertTableQuery.delete((objectMapSequence.size())-1,objectMapSequence.size());
+        insertTableQuery.delete((insertTableQuery.length()-2), insertTableQuery.length());
         insertTableQuery.append(") values (");
         for (String fieldKey : objectMapSequence){
             insertTableQuery.append("?,");
         }
-        insertTableQuery.delete((objectMapSequence.size()),objectMapSequence.size());
+        insertTableQuery.delete((insertTableQuery.length()-1), insertTableQuery.length());
         insertTableQuery.append(");");
 
 
@@ -74,54 +74,53 @@ public class ClassDAO {
         String sqlInsertIntoTable=String.valueOf(insertTableQuery);
         try{
             PreparedStatement pstmt = conn.prepareStatement(sqlInsertIntoTable);
+            int i=0;
             for(String fieldKey :objectMapSequence){
-                int i=0;
-                for(String str : instanceMapped.get(fieldKey)){
-                    i++;
-                    if (i> 1){
-                        String dataType = instanceMapped.get(fieldKey).get(0);
-                        String strValue;
-                        switch (dataType){
-                            case "java.lang.String":
-                                strValue=instanceMapped.get(fieldKey).get(1);
-                                pstmt.setString(i,strValue);
+                i++;
+                String dataType = findDataType(instanceMapped, fieldKey);
+                String dataValue = findDataValue(instanceMapped,fieldKey);
+
+                    switch (dataType){
+                        case "java.lang.String":
+                            pstmt.setString(i,dataValue);
+                            break;
+                        case "int":
+                            pstmt.setInt(i,Integer.valueOf(dataValue));
+                            break;
+                        case "float":
+                                pstmt.setFloat(i,Float.parseFloat(dataValue));
                                 break;
-                            case "int":
-                                strValue=instanceMapped.get(fieldKey).get(1);
-                                pstmt.setInt(i,Integer.valueOf(instanceMapped.get(fieldKey).get(1)));
+                        case "double":
+                                pstmt.setDouble(i,Double.valueOf(dataValue));
                                 break;
-                            case "float":
-                                strValue=instanceMapped.get(fieldKey).get(1);
-                                pstmt.setFloat(i,Float.parseFloat(instanceMapped.get(fieldKey).get(1)));
+                        case "boolean":
+                                pstmt.setBoolean(i,Boolean.valueOf(dataValue));
                                 break;
-                            case "double":
-                                strValue=instanceMapped.get(fieldKey).get(1);
-                                pstmt.setDouble(i,Double.valueOf(instanceMapped.get(fieldKey).get(1)));
-                                break;
-                            case "boolean":
-                                strValue=instanceMapped.get(fieldKey).get(1);
-                                pstmt.setBoolean(i,Boolean.valueOf(instanceMapped.get(fieldKey).get(1)));
-                                break;
-                            default:
+                        default:
                                 break;
                         }
-                    }
 
                 }
-            }
 
-            int rowInserted = pstmt.executeUpdate();
-            if((rowInserted!=0)){
-                //4.-Send status of the process
-                return true;
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+                int rowInserted = pstmt.executeUpdate();
+                if((rowInserted!=0)){
+                    //4.-Send status of the process
+                    return true;
+                }
+            } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         //4.-Send status of the process
         return false;
     }
 
+    private String findDataType(HashMap<String, ArrayList<String>> instanceMapped, String key){
+
+        return instanceMapped.get(key).get(0);
+    }
+
+    private String findDataValue(HashMap<String, ArrayList<String>> instanceMapped, String key){
+        return instanceMapped.get(key).get(1);
+    }
 }

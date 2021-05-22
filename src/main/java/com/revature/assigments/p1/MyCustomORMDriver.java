@@ -1,9 +1,9 @@
 package com.revature.assigments.p1;
 
 import com.revature.assigments.p1.models.AppUser;
-import com.revature.assigments.p1.repos.ClassDAO;
+import com.revature.assigments.p1.repos.ObjectDAO;
 import com.revature.assigments.p1.repos.ConnectionPool;
-import com.revature.assigments.p1.services.ClassService;
+import com.revature.assigments.p1.services.ObjectService;
 import com.revature.assigments.p1.util.ObjectMapper;
 
 import java.util.*;
@@ -12,9 +12,9 @@ public class MyCustomORMDriver {
 
     public static void main(String[] args){
 
-        ClassDAO classDAO = new ClassDAO();
-        ConnectionPool connectionsController = new ConnectionPool();
-        ClassService classService = new ClassService(classDAO, connectionsController);
+        ObjectDAO objectDAO = new ObjectDAO();
+        ConnectionPool connectionPool = new ConnectionPool();
+        ObjectService objectService = new ObjectService(objectDAO, connectionPool);
         /*
         try{
             String packageName = "com.revature.assigments.p1.models";
@@ -34,7 +34,7 @@ public class MyCustomORMDriver {
         */
 
         TreeMap<String,ArrayList<String>> objectMapped;
-        TreeMap<String,ArrayList<String>> instanceMapped;
+        HashMap<String,ArrayList<String>> instanceMapped;
         ArrayList<String> objectMapSequence;
 
         AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
@@ -42,8 +42,8 @@ public class MyCustomORMDriver {
 
         objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(appUser);
         objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(appUser);
-        instanceMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(appUser);
-        classService.sendInstanceToDB(objectMapSequence,objectMapped,instanceMapped);
+        instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(appUser);
+        objectService.sendInstanceToDB(objectMapSequence,objectMapped,instanceMapped);
 
 
 

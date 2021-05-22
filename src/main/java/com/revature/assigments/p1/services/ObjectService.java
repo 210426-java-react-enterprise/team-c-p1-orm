@@ -1,25 +1,26 @@
 package com.revature.assigments.p1.services;
 
-import com.revature.assigments.p1.repos.ClassDAO;
+import com.revature.assigments.p1.repos.ObjectDAO;
 import com.revature.assigments.p1.repos.ConnectionPool;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
-public class ClassService {
-    private ClassDAO classDao;
+public class ObjectService {
+    private ObjectDAO objectDao;
     private ConnectionPool connectionPool;
 
 
-    public ClassService(ClassDAO classDao, ConnectionPool connectionPool) {
-        this.classDao = classDao;
+    public ObjectService(ObjectDAO objectDao, ConnectionPool connectionPool) {
+        this.objectDao = objectDao;
         this.connectionPool = connectionPool;
     }
 
     
-    public boolean sendInstanceToDB(ArrayList<String> objectMapSequence, TreeMap<String, ArrayList<String>> objectMapped, TreeMap<String, ArrayList<String>> instanceMapped) {
+    public boolean sendInstanceToDB(ArrayList<String> objectMapSequence, TreeMap<String, ArrayList<String>> objectMapped, HashMap<String, ArrayList<String>> instanceMapped) {
         
         Connection conn = null;
 
@@ -29,7 +30,7 @@ public class ClassService {
             System.out.println(e.getMessage());
         }
         
-        classDao.saveInstance(conn, objectMapSequence, objectMapped, instanceMapped);
+        objectDao.saveInstance(conn, objectMapSequence, objectMapped, instanceMapped);
 
 
         //connectionPool.addToConnectionPool();

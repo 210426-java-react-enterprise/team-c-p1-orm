@@ -110,7 +110,7 @@ public class ObjectMapper {
             throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
         }
 
-        Map<String,ArrayList<String>> instanceMap = new TreeMap<String,ArrayList<String>>();
+        Map<String,ArrayList<String>> instanceMap = new HashMap<String,ArrayList<String>>();
         String key;
         ArrayList<String> supportArray = new ArrayList<>();
 
