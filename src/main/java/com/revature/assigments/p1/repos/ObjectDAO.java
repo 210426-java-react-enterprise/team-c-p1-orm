@@ -70,7 +70,6 @@ public class ObjectDAO {
         insertTableQuery.append(");");
 
 
-        //HERE
         String sqlInsertIntoTable=String.valueOf(insertTableQuery);
         try{
             PreparedStatement pstmt = conn.prepareStatement(sqlInsertIntoTable);
@@ -123,4 +122,13 @@ public class ObjectDAO {
     private String findDataValue(HashMap<String, ArrayList<String>> instanceMapped, String key){
         return instanceMapped.get(key).get(1);
     }
+
+    public <T> Object requestInstanceData(Object object, T objectId){
+        Object objectRequested = new Object();
+        
+
+
+        return objectRequested;
+    }
+
 }

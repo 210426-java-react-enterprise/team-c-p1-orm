@@ -76,11 +76,6 @@ public class ObjectMapper {
                 objectMap.put(key, (ArrayList) supportArray.clone());
                 supportArray.clear();
 
-                // How to access the Array inside my map
-               /*objectMap.get(key).forEach((String str) -> {
-                   System.out.println(str);
-               });*/
-
             }
 
             field.setAccessible(false);
@@ -104,59 +99,48 @@ public class ObjectMapper {
     public static Map<?,?>createInstanceMapForDB(Object object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
-
-        //1.- Ensure that the respective object contains @Entity
-        if(!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)){
-            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
-        }
-
         Map<String,ArrayList<String>> instanceMap = new HashMap<String,ArrayList<String>>();
+
         String key;
         ArrayList<String> supportArray = new ArrayList<>();
 
-        //2.-Adding the instance name to the Map
+        //1.-Adding the instance name to the Map
         key = objectValue;
 
         supportArray.add(objectClass.getAnnotation(Table.class).name());
         instanceMap.put(key ,(ArrayList)supportArray.clone());
 
-
-        //Iterating the fields to get their values
+        //2.-Iterating the fields to get their values
         Field[] objectClassFields = objectClass.getDeclaredFields();
         for(Field field : objectClassFields) {
             field.setAccessible(true);
             Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
             for (Annotation annotation : fieldAnnotations) {
                 //3.-Adding table columns to the Map
-
                 if (!field.isAnnotationPresent(Column.class)) {
-                    throw new RuntimeException(objectClass.getName() + " >> This instance must contains @Column to be able to mapped into a DB");
+                        throw new RuntimeException(objectClass.getName() + " >> This instance must contains @Column to be able to mapped into a DB");
                 }
 
                 key = field.getAnnotation(Column.class).name();
                 supportArray.add(field.getType().getTypeName());
                 try{
-                    supportArray.add(field.get(object).toString());
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-
+                        supportArray.add(field.get(object).toString());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
 
                 instanceMap.put(key, (ArrayList) supportArray.clone());
                 supportArray.clear();
 
-                // How to access the Array inside my map
-               /*objectMap.get(key).forEach((String str) -> {
-                   System.out.println(str);
-               });*/
-
             }
 
             field.setAccessible(false);
+
         }
 
-        //5.-Returning the Map
+        //4.-Returning the Map
         return instanceMap;
+
     }
 
     /**
@@ -168,14 +152,8 @@ public class ObjectMapper {
     public static ArrayList<String> objectFieldSequence(Object object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
-
-        //1.- Ensure that the respective object contains @Entity
-        if (!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)) {
-            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
-        }
         ArrayList<String> sequence = new ArrayList<String>();
-
-        //Iterating the fields to get the annotations
+        //1.-Iterating the fields to get the annotations
         Field[] objectClassFields = objectClass.getDeclaredFields();
         for (Field field : objectClassFields) {
             field.setAccessible(true);
@@ -184,7 +162,7 @@ public class ObjectMapper {
                 //2.-Adding @Column to the sequence
 
                 if (!field.isAnnotationPresent(Column.class)) {
-                    throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
+                        throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
                 }
 
                 String[] support = String.valueOf(annotation).split("\\.");
@@ -197,12 +175,25 @@ public class ObjectMapper {
             }
 
             field.setAccessible(false);
+
         }
 
         //3.-Returning the ArrayList
-
         return sequence;
     }
 
+    /**
+     * This method verify is the object class was annotated as @Entity and @Table if not return an exception
+     * @param object
+     * @throws RuntimeException
+     */
+    public static void verifyObjectClass(Object object) throws RuntimeException{
+        Class<?> objectClass = Objects.requireNonNull(object.getClass());
+
+        //1.- Ensure that the respective object contains @Entity
+        if(!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)){
+            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
+        }
+    }
 
 }

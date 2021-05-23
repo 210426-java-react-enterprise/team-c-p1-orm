@@ -33,25 +33,26 @@ public class MyCustomORMDriver {
         }
         */
 
-        TreeMap<String,ArrayList<String>> objectMapped;
-        HashMap<String,ArrayList<String>> instanceMapped;
-        ArrayList<String> objectMapSequence;
 
-        AppUser appUser = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
-        appUser.setId(1);
+        AppUser appUserOut = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
+        appUserOut.setId(1);
 
-        objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(appUser);
-        objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(appUser);
-        instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(appUser);
-        if(!objectService.sendInstanceToDB(objectMapSequence,objectMapped,instanceMapped)){
+        if(!objectService.sendInstanceToDB(appUserOut)){
             System.out.println("The object COULDN'T be saved into DB");
         }else{
             System.out.println("The object was SAVED into DB");
         }
+
+
+
+        objectService.bringInstanceFromDB(AppUser.class,1);
+
 
         connectionPool.closeConnections();
 
     }
 
 
+    private static class bringInstanceFromDB extends AppUser {
+    }
 }
