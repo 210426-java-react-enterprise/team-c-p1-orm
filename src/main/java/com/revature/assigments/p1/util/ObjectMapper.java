@@ -96,7 +96,7 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static Map<?,?>createInstanceMapForDB(Object object){
+    public static<T> Map<?,?>createInstanceMapForDB(T object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
         Map<String,ArrayList<String>> instanceMap = new HashMap<String,ArrayList<String>>();
@@ -125,8 +125,10 @@ public class ObjectMapper {
                 supportArray.add(field.getType().getTypeName());
                 try{
                         supportArray.add(field.get(object).toString());
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                    }catch (NullPointerException e){
+                        supportArray.add(null);//If the field is empty return null
+                    }catch (Exception e2) {
+                        e2.printStackTrace();
                     }
 
                 instanceMap.put(key, (ArrayList) supportArray.clone());
@@ -196,4 +198,11 @@ public class ObjectMapper {
         }
     }
 
+    /*public static <T> T updateInstance (T Object,
+                                             TreeMap<String, ArrayList<String>> objectMapped,
+                                             HashMap<String, ArrayList<String>> instanceMappedobjectMapped){
+
+
+        return object
+    }*/
 }

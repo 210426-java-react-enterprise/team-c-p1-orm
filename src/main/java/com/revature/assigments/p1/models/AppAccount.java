@@ -1,9 +1,21 @@
 package com.revature.assigments.p1.models;
 
+import com.revature.assigments.p1.annotations.Column;
+import com.revature.assigments.p1.annotations.Entity;
+import com.revature.assigments.p1.annotations.Id;
+import com.revature.assigments.p1.annotations.Table;
+
+@Entity
+@Table(name="app_account")
 public class AppAccount {
+    @Id
+    @Column(name="acct_id", dataType="int")
     private int id;
+    @Column(name="acct_type", dataType="int")
     private String accountType;
+    @Column(name = "curr", dataType="int")
     private String currency;
+    @Column(name="acct_balance", dataType="numeric")
     private double balance;
 
     public AppAccount() { super();}

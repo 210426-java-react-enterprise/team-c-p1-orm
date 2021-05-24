@@ -1,5 +1,6 @@
 package com.revature.assigments.p1;
 
+import com.revature.assigments.p1.models.AppAccount;
 import com.revature.assigments.p1.models.AppUser;
 import com.revature.assigments.p1.repos.ObjectDAO;
 import com.revature.assigments.p1.repos.ConnectionPool;
@@ -34,14 +35,14 @@ public class MyCustomORMDriver {
         */
 
 
-        AppUser appUserOut = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
+        /*AppUser appUserOut = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
         appUserOut.setId(1);
 
         if(!objectService.sendInstanceToDB(appUserOut)){
             System.out.println("The object COULDN'T be saved into DB");
         }else{
             System.out.println("The object was SAVED into DB");
-        }
+        }*/
 
 
 

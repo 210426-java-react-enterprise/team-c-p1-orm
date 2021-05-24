@@ -1,6 +1,8 @@
 package com.revature.assigments.p1.repos;
 
+import com.revature.assigments.p1.exceptions.ObjectNotFoundInDB;
 import com.revature.assigments.p1.util.ConnectionFactory;
+import com.revature.assigments.p1.util.ObjectMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +13,8 @@ import java.util.*;
 
 public class ObjectDAO {
 
-    public boolean saveInstance(Connection conn, ArrayList<String> objectMapSequence,
+    public boolean saveInstance(Connection conn,
+                                ArrayList<String> objectMapSequence,
                                 TreeMap<String, ArrayList<String>> objectMapped,
                                 HashMap<String, ArrayList<String>> instanceMapped){
 
@@ -123,12 +126,49 @@ public class ObjectDAO {
         return instanceMapped.get(key).get(1);
     }
 
-    public <T> Object requestInstanceData(Object object, T objectId){
-        Object objectRequested = new Object();
-        
+    /**
+     * This method is responsible to bring the instance data from DB and return it as map
+     * @param conn
+     * @param object -- this is the object use to build the select statement
+     * @param objectId -- This is the column used in the select statement to bring the data in where the condition
+     * @param objectMapSequence
+     * @param objectMapped
+     * @param <T>
+     * @param <E>
+     * @return
+     * @throws ObjectNotFoundInDB
+     */
+    public <T,E> Map<?,?>requestInstanceData(   Connection conn,
+                                                T object,
+                                                E objectId,
+                                                ArrayList<String> objectMapSequence,
+                                                TreeMap<String, ArrayList<String>> objectMapped) throws ObjectNotFoundInDB {
 
 
-        return objectRequested;
+
+        //Mapping the instance MAP
+        HashMap<String, ArrayList<String>> instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(object);
+
+
+        //1-Create Select Statement to bring object data
+        StringBuilder selectQuery = new StringBuilder("select * from ").append(objectMapped.get("TABLE").get(0)).append(";");
+        try{
+            PreparedStatement pstmt = conn.prepareStatement(String.valueOf(selectQuery));
+            ResultSet rs = pstmt.executeQuery();
+            //2- Check if the select statement brought data from DB
+            while (rs.next()){
+                //3.- Populate the instance Map with result from query
+                for (String str : objectMapSequence){
+                    instanceMapped.get(str).add(rs.getString(str));
+                }
+            }
+
+            } catch (SQLException e) {
+                throw new ObjectNotFoundInDB("The object >>> " + object.getClass().toString() + " <<< not found in DB");
+            }
+
+        //4.-Return the instance map with DB data
+        return instanceMapped;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.revature.assigments.p1.services;
 
+import com.revature.assigments.p1.exceptions.ObjectNotFoundInDB;
 import com.revature.assigments.p1.repos.ObjectDAO;
 import com.revature.assigments.p1.repos.ConnectionPool;
 import com.revature.assigments.p1.util.ObjectMapper;
@@ -77,25 +78,35 @@ public class ObjectService {
      */
     public <T, E> T bringInstanceFromDB(Class<?> T, E objectId){
         Connection conn = null;
-        Object object = makeNewInstance(T);
+        Class<T> clazz = (Class<T>) T;
+        T object = (T) makeNewInstance(T);
 
+        TreeMap<String,ArrayList<String>> objectMapped;
+        HashMap<String,ArrayList<String>> instanceMapped;
+        ArrayList<String> objectMapSequence;
 
+        //1.-Getting the connection from the pool
         try {
             conn = connectionPool.pollFromConnectionPool();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        //2.-Verifying and populating the support data structures
         try{
-
             ObjectMapper.verifyObjectClass(object); // Verifying if the object has the annotations @Entity and @Table
-            objectDao.requestInstanceData(object, objectId);
 
+            objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(object);
+            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(object);
+            //3.-Calling the DAO method to populate the Instance Map
 
-
+            objectDao.requestInstanceData(conn, object, objectId,objectMapSequence, objectMapped);
+            //4.-Call the Object Mapper to populate the new Instance.
             return (T) object;
 
-        }catch (RuntimeException e){
+        }catch(ObjectNotFoundInDB e){
             System.out.println(e.getMessage());
+        }catch (RuntimeException e2){
+            System.out.println(e2.getMessage());
         }
 
         return null;
