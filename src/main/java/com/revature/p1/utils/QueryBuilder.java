@@ -157,7 +157,7 @@ public class QueryBuilder {
         return null;
     }
 
-    public <T> String createTableFromObject(Class<?> clazz) {
+    public String createTableFromObject(Class<?> clazz) {
         StringBuilder sb = new StringBuilder();
         Objects.requireNonNull(clazz);
 
@@ -168,6 +168,7 @@ public class QueryBuilder {
         String tableName = entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName;
 
         sb.append("create table ").append(tableName).append(" ( \n");
+        
         Arrays.stream(clazz.getDeclaredFields()).forEach(field -> sb.append(getFieldName(field)).append(" ")
                 .append(getSQLType(field)).append(!field.getAnnotation(Column.class).nullable() ? " not null, \n" : ", \n"));
         sb.append("primary key ").append(getFieldName(getPrimaryField(clazz))).append(",\n);"); //will implement foreign keys later (maybe)
@@ -197,6 +198,7 @@ public class QueryBuilder {
         return Arrays.stream(clazz.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Key.class))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("This entity does not have a primary key"));
+
     }
 
     private <T> String getFieldName(Field field) {
@@ -225,7 +227,7 @@ public class QueryBuilder {
             case "LocalDateTime":
                 return SQLTypes.LOCALDATETIME.toString();
             default:
-                return null;
+                throw new RuntimeException("That field type is not yet mapped");
         }
     }
 

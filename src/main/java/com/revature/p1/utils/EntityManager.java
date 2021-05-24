@@ -57,6 +57,8 @@ public class EntityManager {
         return null;
     }
 
+
+
     public <T> boolean update(T object) {
         try {
             Connection connection = DataSource.getInstance().getConnection();

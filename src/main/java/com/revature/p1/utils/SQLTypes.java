@@ -1,7 +1,5 @@
 package com.revature.p1.utils;
 
-import java.lang.reflect.Field;
-
 public enum SQLTypes { //should this exist?
 
     INT("int"),
@@ -24,26 +22,3 @@ public enum SQLTypes { //should this exist?
         return value;
     }
 }
-
-//    private String getSQLType(Field field) {
-//        switch (field.getType().getSimpleName()) {
-//            case "int":
-//                return "int";
-//            case "double":
-//                return "double";
-//            case "long":
-//                return "bigint";
-//            case "String":
-//                return "varchar";
-//            case "boolean":
-//                return "bit";
-//            case "character":
-//                return "char(1)";
-//            case "BigDecimal":
-//                return "numeric";
-//            case "LocalDateTime":
-//                return "timestamp";
-//            default:
-//                return null;
-//        }
-//    }
