@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.revature</groupId>
-    <artifactId>p1</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>orm</artifactId>
+    <version>0.1</version>
 
     <properties>
-        <maven.compiler.source>16</maven.compiler.source>
-        <maven.compiler.target>16</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -31,5 +31,6 @@
         </dependency>
 
     </dependencies>
+
     
 </project>
