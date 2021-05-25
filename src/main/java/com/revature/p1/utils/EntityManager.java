@@ -8,18 +8,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class EntityManager {
 
-    private final QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder = new QueryBuilder();
 
-    public EntityManager(QueryBuilder queryBuilder) {
-        this.queryBuilder = queryBuilder;
+    public EntityManager() {
+
     }
 
     @SuppressWarnings("unchecked")
@@ -98,5 +95,40 @@ public class EntityManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T, E> List<E> getAllOnCondition(Class<?> clazz, T condition, String column) {
+
+        List<E> objects = new ArrayList<>();
+         try {
+             Connection connection = DataSource.getInstance().getConnection();
+             PreparedStatement stmt = queryBuilder.getRowsOnCondition(clazz, condition, column, connection);
+             ResultSet rs = stmt.executeQuery();
+             ResultSetMetaData rsmd = rs.getMetaData();
+             Field[] fields = clazz.getDeclaredFields();
+
+             while (rs.next()) {
+                 E object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
+                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                     Field temp = fields[i - 1];
+                     temp.setAccessible(true);
+                     if (temp.getAnnotation(Column.class).isTimestamp()) { //Feels hacky. If it is isTimestamp, convert to DateTime.
+                         temp.set(object, rs.getTimestamp(i).toLocalDateTime());
+                         temp.setAccessible(false);
+                         continue;
+                     }
+                     temp.set(object, rs.getObject(i));
+                     temp.setAccessible(false);
+                 }
+                 objects.add(object);
+             }
+             return objects;
+         } catch (SQLException | ClassNotFoundException |
+                 NoSuchMethodException | InvocationTargetException |
+                 InstantiationException | IllegalAccessException e) {
+             e.printStackTrace();
+         }
+         return objects;
     }
 }

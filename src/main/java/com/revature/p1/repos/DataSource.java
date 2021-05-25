@@ -18,15 +18,6 @@ public class DataSource implements ConnectionPool {
     private String login;
     private String password;
 
-
-    static {
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static DataSource getInstance() {
         if(instance == null) {
             instance = new DataSource();
@@ -36,9 +27,6 @@ public class DataSource implements ConnectionPool {
 
 
     private DataSource () {
-        url = System.getenv("host-url");
-        login = System.getenv("login");
-        password = System.getenv("password");
         connectionPool = new ArrayList<>(POOL_SIZE);
         try {
             for (int i = 0; i < POOL_SIZE; i++){

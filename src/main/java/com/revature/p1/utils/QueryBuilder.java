@@ -177,6 +177,26 @@ public class QueryBuilder {
         return sb.toString();
     }
 
+    public <T> PreparedStatement getRowsOnCondition(Class<?> clazz, T condition, String column, Connection connection) {
+        Objects.requireNonNull(clazz);
+        StringBuilder sb = new StringBuilder();
+
+        if (!clazz.isAnnotationPresent(Entity.class))
+            throw new IllegalArgumentException(clazz.getName() + " is not an Entity");
+
+        String entityName = clazz.getAnnotation(Entity.class).name();
+        String tableName = entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName;
+
+        sb.append("select * from ").append(tableName).append(" where ").append(column).append(" = ").append(condition);
+
+        try {
+            return connection.prepareStatement(sb.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     @SuppressWarnings("unchecked")
     private <T> T getPrimaryKey(T object) throws IllegalAccessException {
