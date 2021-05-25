@@ -198,11 +198,4 @@ public class ObjectMapper {
         }
     }
 
-    /*public static <T> T updateInstance (T Object,
-                                             TreeMap<String, ArrayList<String>> objectMapped,
-                                             HashMap<String, ArrayList<String>> instanceMappedobjectMapped){
-
-
-        return object
-    }*/
 }

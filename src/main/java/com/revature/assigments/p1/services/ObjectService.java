@@ -9,10 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ObjectService {
     private ObjectDAO objectDao;
@@ -76,7 +73,7 @@ public class ObjectService {
      * @param <E>
      * @return -- The requested new instance of the class passed as input
      */
-    public <T, E> T bringInstanceFromDB(Class<?> T, E objectId){
+    public <T,E> T bringInstanceFromDB(Class<?> T, E objectId){
         Connection conn = null;
         Class<T> clazz = (Class<T>) T;
         T object = (T) makeNewInstance(T);
@@ -101,6 +98,10 @@ public class ObjectService {
 
             objectDao.requestInstanceData(conn, object, objectId,objectMapSequence, objectMapped);
             //4.-Call the Object Mapper to populate the new Instance.
+
+
+            Method setIdMethod = object.getClass().getMethod("set")
+
             return (T) object;
 
         }catch(ObjectNotFoundInDB e){
@@ -131,7 +132,7 @@ public class ObjectService {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
+        }git s
 
        return null;
     }
