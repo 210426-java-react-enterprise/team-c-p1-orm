@@ -98,7 +98,7 @@ public class ObjectService {
 
             objectDao.requestInstanceData(conn, object, objectId,objectMapSequence, objectMapped);
             //4.-Call the Object Mapper to populate the new Instance.
-            
+            //After to talk with Wezley the only way to update my new instance is through reflection
 
             //ChanMethod setIdMethod = object.getClass().getMethod("set")
 
