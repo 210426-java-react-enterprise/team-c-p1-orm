@@ -1,5 +1,11 @@
 package com.revature.orm;
 
+import com.revature.orm.annotations.ColumnType;
+import com.revature.orm.annotations.MyColumn;
+import com.revature.orm.annotations.MyEntity;
+import com.revature.orm.exceptions.InvalidAnnotationException;
+import com.revature.orm.exceptions.ObjectConditionMismatchException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,72 +26,85 @@ public class MyObjectRelationalMapper
         this.connection = connection;
     }
 
-    public MySavable readRow(MySavable savable)
+    public <T, E> T readRow(Class<?> clazz, Pair<String, E> condition)
     {
-        StringBuilder sb = new StringBuilder();
+        //Check for object validity, nullness and annotation
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(condition);
         try
         {
-            if (!savable.getClass()
-                        .isAnnotationPresent(com.revature.orm.annotations.MyEntity.class))
+            if (!clazz.isAnnotationPresent(MyEntity.class))
             {
-                throw new com.revature.orm.exceptions.NotSavableObjectException("Object is not a 'Savable' type!");
+                throw new InvalidAnnotationException("Object is not a properly annotated type!");
             }
-            List<Field> fields = new ArrayList<>(Arrays.asList(savable.getClass()
-                                                                      .getDeclaredFields()));
-            List<Field> pks = fields.stream()
-                                    .filter(field -> field.isAnnotationPresent(com.revature.orm.annotations.MyColumn.class) &&
-                                                             field.getAnnotation(com.revature.orm.annotations.MyColumn.class)
-                                                                  .pk())
-                                    .filter(field ->
-                                            {
-                                                field.setAccessible(true);
-                                                try
-                                                {
-                                                    return field.get(savable) != null;
-                                                } catch (IllegalAccessException e)
-                                                {
-                                                    e.printStackTrace();
-                                                }
-                                                return false;
-                                            })
-                                    .collect(Collectors.toList());
-            if (pks.size() == 0) return savable;
-            sb.append("SELECT * FROM project1.")
-              .append(savable.getClass()
-                             .getAnnotation(com.revature.orm.annotations.MyEntity.class)
-                             .name())
-              .append(" WHERE ")
-              .append(pks.get(0)
-                         .getAnnotation(com.revature.orm.annotations.MyColumn.class)
-                         .name())
-              .append(" = ")
-              .append(pks.get(0)
-                         .getAnnotation(com.revature.orm.annotations.MyColumn.class)
-                         .type() == com.revature.orm.annotations.ColumnType.VARCHAR ? "'" : "")
-              .append(pks.get(0)
-                         .get(savable))
-              .append(pks.get(0)
-                         .getAnnotation(com.revature.orm.annotations.MyColumn.class)
-                         .type() == com.revature.orm.annotations.ColumnType.VARCHAR ? "'" : "");
-        } catch (IllegalAccessException | com.revature.orm.exceptions.NotSavableObjectException e)
+        } catch (InvalidAnnotationException e)
         {
             e.printStackTrace();
+            return null;
         }
 
-        ResultSet resultSet = null;
+        List<Field> classFields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+        //Validating object / condition
+        List<Field> fields = classFields.stream()
+                                        //Filtering annotated fields
+                                        .filter(field -> field.isAnnotationPresent(MyColumn.class))
+                                        //Filtering matching field
+                                        .filter(field -> field.getAnnotation(MyColumn.class)
+                                                              .name()
+                                                              .equals(condition.getFirst()))
+                                        .collect(Collectors.toList());
+        //Check for more than result found
+        if (fields.size() == 0)
+        {
+            try
+            {
+                throw new ObjectConditionMismatchException();
+            } catch (ObjectConditionMismatchException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        //Build SQL query
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT ")
+          .append(clazz.getAnnotation(MyEntity.class)
+                       .name())
+          .append(".")
+          .append(condition.getFirst())
+          .append(" FROM project1.")
+          .append(clazz.getAnnotation(MyEntity.class)
+                       .name())
+          .append(" WHERE ")
+          .append(condition.getFirst())
+          .append("=")
+          .append(fields.get(0)
+                        .getAnnotation(MyColumn.class)
+                        .type()
+                        .equals(ColumnType.VARCHAR) ? "'" : "")
+          .append(condition.getSecond()
+                           .toString())
+          .append(fields.get(0)
+                        .getAnnotation(MyColumn.class)
+                        .type()
+                        .equals(ColumnType.VARCHAR) ? "'" : "");
+
+        System.out.println(sb);
+        //Query the DB
         try
         {
-            PreparedStatement statement = connection.prepareStatement(sb.toString());
-            resultSet = statement.executeQuery();
+            PreparedStatement preparedStatement = connection.prepareStatement(sb.toString());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next())
+            {
+                //Build the object
+                return (T) objectBuilder(clazz, resultSet).get(0);
+            }
         } catch (SQLException e)
         {
             e.printStackTrace();
         }
-        List<MySavable> savables = buildSavables(savable, Objects.requireNonNull(resultSet));
+        return null;
 
-        if(savables.size() == 0) {
-            return savable;
-        } else return savables.get(0);
     }
 
     public List<MySavable> readRows(MySavable savable)
@@ -96,9 +115,9 @@ public class MyObjectRelationalMapper
             if (!savable.getClass()
                         .isAnnotationPresent(com.revature.orm.annotations.MyEntity.class))
             {
-                throw new com.revature.orm.exceptions.NotSavableObjectException("Object is not a 'Savable' type!");
+                throw new InvalidAnnotationException("Object is not a 'Savable' type!");
             }
-        } catch (com.revature.orm.exceptions.NotSavableObjectException e)
+        } catch (InvalidAnnotationException e)
         {
             e.printStackTrace();
         }
@@ -178,78 +197,84 @@ public class MyObjectRelationalMapper
         return null;
     }
 
-    private List<MySavable> buildSavables(MySavable savable, ResultSet resultSet)
+    private <T> List<T> objectBuilder(Class<?> clazz, ResultSet resultSet)
     {
-        List<Field> fields = new ArrayList<>(Arrays.asList(savable.getClass()
-                                                                  .getDeclaredFields()));
-        List<MySavable> savables = new ArrayList<>();
+        //List of annotated class fields to populate
+        List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+        //Objects to return
+        List<T> objects = new ArrayList<>();
         try
         {
             while (resultSet.next())
             {
-                List<Method> methods = new ArrayList<>(Arrays.asList(savable.getClass()
-                                                                            .getDeclaredMethods()));
-                fields.forEach(field ->
-                               {
-                                   if (field.isAnnotationPresent(com.revature.orm.annotations.MyColumn.class))
-                                   {
-                                       methods.forEach(method ->
-                                                       {
-                                                           if (method.getName()
-                                                                     .toLowerCase(Locale.ROOT)
-                                                                     .startsWith("set"))
-                                                           {
-                                                               String methodName = method.getName()
-                                                                                         .toLowerCase(Locale.ROOT)
-                                                                                         .substring(3);
-                                                               if (field.getName()
-                                                                        .toLowerCase(Locale.ROOT)
-                                                                        .equals(methodName))
-                                                               {
-                                                                   //System.out.println("field: " + field.getName() + "\tmethod: " + method.getName());
-                                                                   try
-                                                                   {
-                                                                       switch (field.getAnnotation(com.revature.orm.annotations.MyColumn.class)
-                                                                                    .type())
-                                                                       {
-                                                                           case VARCHAR:
-                                                                               field.setAccessible(true);
-                                                                               method.invoke(savable,
-                                                                                             resultSet.getString(field.getAnnotation(
-                                                                                                     com.revature.orm.annotations.MyColumn.class)
-                                                                                                                      .name()));
-                                                                               field.setAccessible(false);
-                                                                               break;
-                                                                           case INT:
-                                                                           case SERIAL:
-                                                                               field.setAccessible(true);
-                                                                               method.invoke(savable,
-                                                                                             resultSet.getInt(field.getAnnotation(
-                                                                                                     com.revature.orm.annotations.MyColumn.class)
-                                                                                                                   .name()));
-                                                                               field.setAccessible(false);
-                                                                               break;
-                                                                           case DECIMAL:
-                                                                               field.setAccessible(true);
-                                                                               method.invoke(savable,
-                                                                                             resultSet.getDouble(field.getAnnotation(
-                                                                                                     com.revature.orm.annotations.MyColumn.class)
-                                                                                                                      .name()));
-                                                                               field.setAccessible(false);
-                                                                       }
+                //Class Methods to inspect for setters
+                List<Method> methods = new ArrayList<>(Arrays.asList(clazz.getDeclaredMethods()));
 
-                                                                       //method.invoke(savable, resultSet.getString(field.getAnnotation(MyColumn.class).name()));
-                                                                       field.setAccessible(false);
+                //Search for setter methods by name
+                List<Method> setterMethods = methods.stream()
+                                                    .filter(method ->
+                                                                    method.getName()
+                                                                          .toLowerCase(Locale.ROOT)
+                                                                          .startsWith("set"))
+                                                    .collect(Collectors.toList());
+                fields.forEach(field -> {
+                    setterMethods.forEach(method ->
+                                {
+                                    if (method.getName()
+                                              .toLowerCase(Locale.ROOT)
+                                              .startsWith("set"))
+                                    {
+                                        String methodName = method.getName()
+                                                                  .toLowerCase(Locale.ROOT)
+                                                                  .substring(3);
+                                        if (field.getName()
+                                                 .toLowerCase(Locale.ROOT)
+                                                 .equals(methodName))
+                                        {
+                                            //System.out.println("field: " + field.getName() + "\tmethod: " + method.getName());
+                                            try
+                                            {
+                                                switch (field.getAnnotation(com.revature.orm.annotations.MyColumn.class)
+                                                             .type())
+                                                {
+                                                    case VARCHAR:
+                                                        field.setAccessible(true);
+                                                        method.invoke(savable,
+                                                                      resultSet.getString(field.getAnnotation(
+                                                                              com.revature.orm.annotations.MyColumn.class)
+                                                                                               .name()));
+                                                        field.setAccessible(false);
+                                                        break;
+                                                    case INT:
+                                                    case SERIAL:
+                                                        field.setAccessible(true);
+                                                        method.invoke(savable,
+                                                                      resultSet.getInt(field.getAnnotation(
+                                                                              com.revature.orm.annotations.MyColumn.class)
+                                                                                            .name()));
+                                                        field.setAccessible(false);
+                                                        break;
+                                                    case DECIMAL:
+                                                        field.setAccessible(true);
+                                                        method.invoke(savable,
+                                                                      resultSet.getDouble(field.getAnnotation(
+                                                                              com.revature.orm.annotations.MyColumn.class)
+                                                                                               .name()));
+                                                        field.setAccessible(false);
+                                                }
 
-                                                                   } catch (IllegalAccessException | InvocationTargetException | SQLException e)
-                                                                   {
-                                                                       e.printStackTrace();
-                                                                   }
-                                                               }
-                                                           }
-                                                       });
-                                   }
-                               });
+                                                //method.invoke(savable, resultSet.getString(field.getAnnotation(MyColumn.class).name()));
+                                                field.setAccessible(false);
+
+                                            } catch (IllegalAccessException | InvocationTargetException | SQLException e)
+                                            {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                });
+
+
                 Class<?> clazz = Class.forName(savable.getClass()
                                                       .getName());
                 Object newObject = clazz.getConstructor(MySavable.class)
@@ -273,7 +298,7 @@ public class MyObjectRelationalMapper
             if (!savable.getClass()
                         .isAnnotationPresent(com.revature.orm.annotations.MyEntity.class))
             {
-                throw new com.revature.orm.exceptions.NotSavableObjectException("Not a savable savable!");
+                throw new InvalidAnnotationException("Not a savable savable!");
             }
             String tableName = savable.getClass()
                                       .getAnnotation(com.revature.orm.annotations.MyEntity.class)
@@ -347,7 +372,7 @@ public class MyObjectRelationalMapper
             tailBuilder.setLength(0);
 
 
-        } catch (com.revature.orm.exceptions.NotSavableObjectException e)
+        } catch (InvalidAnnotationException e)
         {
             e.printStackTrace();
         }
@@ -364,7 +389,7 @@ public class MyObjectRelationalMapper
             if (!savable.getClass()
                         .isAnnotationPresent(com.revature.orm.annotations.MyEntity.class))
             {
-                throw new com.revature.orm.exceptions.NotSavableObjectException("Not a savable savable!");
+                throw new InvalidAnnotationException("Not a savable savable!");
             }
             String tableName = savable.getClass()
                                       .getAnnotation(com.revature.orm.annotations.MyEntity.class)
@@ -402,7 +427,7 @@ public class MyObjectRelationalMapper
                                                 .type()
                                                 .equals(com.revature.orm.annotations.ColumnType.SERIAL) || field.getAnnotation(
                                                com.revature.orm.annotations.MyColumn.class)
-                                                                                                               .pk() ||
+                                                                                                                .pk() ||
                                                    field.getAnnotation(com.revature.orm.annotations.MyColumn.class)
                                                         .fk() || field.getAnnotation(com.revature.orm.annotations.MyColumn.class)
                                                                       .unique())
@@ -458,11 +483,13 @@ public class MyObjectRelationalMapper
             }
             headBuilder.setLength(0);
 
-        } catch (com.revature.orm.exceptions.NotSavableObjectException e)
+        } catch (InvalidAnnotationException e)
         {
             e.printStackTrace();
         }
     }
+
+
 }
 
 

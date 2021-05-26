@@ -44,29 +44,30 @@ public class SchemaCreator
 
     private List<String> createQuery(Map<Class<?>,List<MyColumn>> classListMap)
     {
-        List<String> queries = new ArrayList<>();
-
-        classListMap.forEach((clazz,columns) -> {
-            StringBuilder sb = new StringBuilder();
-            sb.append("CREATE TABLE IF NOT EXISTS ").append(clazz.getAnnotation(MyEntity.class).name()).append(" (");
-            columns.forEach((column -> {
-                String type = switch (column.type())
-                        {
-                            case VARCHAR -> "VARCHAR(" + column.length() + ") ";
-                            case INT -> "INT";
-                            case SERIAL -> "SERIAL";
-                            case DECIMAL -> "DECIMAL";
-                            case TIME -> "TIME";
-                            case DATE -> "DATE";
-                        };
-                sb.append(column.name()).append(" ").append(type).append(column.nullable() ? "" : " NOT NULL ")
-                .append(column.unique() ? "UNIQUE " : "").append(column.pk() ? "PRIMARY KEY " : "")
-                .append(column.fk() ? "REFERENCES " + column.reference() + " ON DELETE " + column.delete() : "").append(",");
-            }));
-            sb.deleteCharAt(sb.lastIndexOf(",")).append(")");
-            queries.add(sb.toString());
-        });
-        return queries;
+//        List<String> queries = new ArrayList<>();
+//
+//        classListMap.forEach((clazz,columns) -> {
+//            StringBuilder sb = new StringBuilder();
+//            sb.append("CREATE TABLE IF NOT EXISTS ").append(clazz.getAnnotation(MyEntity.class).name()).append(" (");
+//            columns.forEach((column -> {
+//                String type = switch (column.type())
+//                        {
+//                            case VARCHAR -> "VARCHAR(" + column.length() + ") ";
+//                            case INT -> "INT";
+//                            case SERIAL -> "SERIAL";
+//                            case DECIMAL -> "DECIMAL";
+//                            case TIME -> "TIME";
+//                            case DATE -> "DATE";
+//                        };
+//                sb.append(column.name()).append(" ").append(type).append(column.nullable() ? "" : " NOT NULL ")
+//                .append(column.unique() ? "UNIQUE " : "").append(column.pk() ? "PRIMARY KEY " : "")
+//                .append(column.fk() ? "REFERENCES " + column.reference() + " ON DELETE " + column.delete() : "").append(",");
+//            }));
+//            sb.deleteCharAt(sb.lastIndexOf(",")).append(")");
+//            queries.add(sb.toString());
+//        });
+//        return queries;
+        return null;
     }
 
 
