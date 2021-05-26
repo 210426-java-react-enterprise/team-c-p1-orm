@@ -1,16 +1,13 @@
-package com.revature.assigments.p1.util;
+package com.revature.assigments.orm.util;
 
-import com.revature.assigments.p1.annotations.Column;
-import com.revature.assigments.p1.annotations.Entity;
-import com.revature.assigments.p1.annotations.Id;
-import com.revature.assigments.p1.annotations.Table;
+import com.revature.assigments.orm.annotations.Column;
+import com.revature.assigments.orm.annotations.Entity;
+import com.revature.assigments.orm.annotations.Id;
+import com.revature.assigments.orm.annotations.Table;
 
-import javax.sql.rowset.spi.SyncProvider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ObjectMapper {
 

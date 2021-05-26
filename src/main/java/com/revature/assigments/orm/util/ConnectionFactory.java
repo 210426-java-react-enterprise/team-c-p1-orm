@@ -1,6 +1,5 @@
-package com.revature.assigments.p1.util;
+package com.revature.assigments.orm.util;
 
-import javax.sql.ConnectionPoolDataSource;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;

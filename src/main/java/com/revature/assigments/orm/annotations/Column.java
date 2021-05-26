@@ -1,4 +1,4 @@
-package com.revature.assigments.p1.annotations;
+package com.revature.assigments.orm.annotations;
 
 import java.lang.annotation.*;
 

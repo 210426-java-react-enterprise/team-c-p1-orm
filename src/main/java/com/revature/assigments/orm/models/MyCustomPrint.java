@@ -1,4 +1,4 @@
-package com.revature.assigments.p1.models;
+package com.revature.assigments.orm.models;
 
 @FunctionalInterface
 public interface MyCustomPrint {

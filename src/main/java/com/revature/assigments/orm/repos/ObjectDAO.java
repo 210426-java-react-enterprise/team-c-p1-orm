@@ -1,8 +1,7 @@
-package com.revature.assigments.p1.repos;
+package com.revature.assigments.orm.repos;
 
-import com.revature.assigments.p1.exceptions.ObjectNotFoundInDB;
-import com.revature.assigments.p1.util.ConnectionFactory;
-import com.revature.assigments.p1.util.ObjectMapper;
+import com.revature.assigments.orm.exceptions.ObjectNotFoundInDB;
+import com.revature.assigments.orm.util.ObjectMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -1,8 +1,8 @@
-package com.revature.assigments.p1;
+package com.revature.assigments.orm;
 
-import com.revature.assigments.p1.models.AppUser;
-import com.revature.assigments.p1.annotations.Entity;
-import com.revature.assigments.p1.util.PackagesReader;
+import com.revature.assigments.orm.models.AppUser;
+import com.revature.assigments.orm.annotations.Entity;
+import com.revature.assigments.orm.util.PackagesReader;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -73,7 +73,7 @@ public class ReflectionDriver {
         System.out.println("thisClass == this.getClass() >> "+ (thisClass == this.getClass()));
 
         ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
-        Class <?> someClass = currentClassLoader.loadClass("com.revature.assigments.p1.ReflectionDriver");
+        Class <?> someClass = currentClassLoader.loadClass("com.revature.assigments.orm.ReflectionDriver");
 
         System.out.println("thisClass == someClass >> "+ (thisClass == someClass));
         System.out.println("sameClass == someClass >> "+ (sameClass == someClass));
@@ -83,7 +83,7 @@ public class ReflectionDriver {
     public void exploringExternalClass() throws ClassNotFoundException, IllegalArgumentException, MalformedURLException {
         URL[] urls = new URL[]{new File("target/classes").toURI().toURL()};
         URLClassLoader ucl = new URLClassLoader(urls);
-        Class<?> anotherClass = ucl.loadClass("com.revature.assigments.p1.ReflectionDriver");
+        Class<?> anotherClass = ucl.loadClass("com.revature.assigments.orm.ReflectionDriver");
         System.out.println("this.getClass == anotherClass  >> " + (this.getClass()==anotherClass));
     }
 

@@ -1,10 +1,9 @@
-package com.revature.assigments.p1;
+package com.revature.assigments.orm;
 
-import com.revature.assigments.p1.models.AppUser;
+import com.revature.assigments.orm.models.AppUser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class StreamDriver {

@@ -1,6 +1,6 @@
-package com.revature.assigments.p1.repos;
+package com.revature.assigments.orm.repos;
 
-import com.revature.assigments.p1.util.ConnectionFactory;
+import com.revature.assigments.orm.util.ConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;

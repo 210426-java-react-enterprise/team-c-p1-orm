@@ -1,4 +1,4 @@
-package com.revature.assigments.p1.exceptions;
+package com.revature.assigments.orm.exceptions;
 
 import java.sql.SQLException;
 

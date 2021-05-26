@@ -1,6 +1,6 @@
-package com.revature.assigments.p1;
+package com.revature.assigments.orm;
 
-import com.revature.assigments.p1.models.MyCustomPrint;
+import com.revature.assigments.orm.models.MyCustomPrint;
 
 
 public class LambdaDriver {
