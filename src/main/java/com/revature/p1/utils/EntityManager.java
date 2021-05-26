@@ -1,6 +1,7 @@
 package com.revature.p1.utils;
 
 import com.revature.p1.exceptions.ObjectNotFoundException;
+import com.revature.p1.exceptions.ResourcePersistenceException;
 import com.revature.p1.repos.DataSource;
 import com.revature.p1.utils.annotations.Column;
 import jdk.nashorn.internal.objects.annotations.Where;
@@ -60,7 +61,7 @@ public class EntityManager {
             e.printStackTrace();
             System.out.println(e.getMessage());
         } catch (InvocationTargetException | InstantiationException e) {
-            e.printStackTrace();
+            throw new ObjectNotFoundException("Something went wrong while retrieving the object. (" + e.getMessage() + ")");
         }
         return null;
     }
@@ -74,8 +75,7 @@ public class EntityManager {
             DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException | IllegalAccessException e) {
-            e.printStackTrace();
-            return false;
+            throw new ResourcePersistenceException("Something went wrong while updating the object");
         }
     }
 
@@ -102,7 +102,7 @@ public class EntityManager {
             return object;
         } catch (SQLException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
-            throw new ObjectNotFoundException("Something went wrong while saving the object");
+            throw new ResourcePersistenceException("Something went wrong while saving the object. (" + e.getMessage() + ")");
         }
     }
 
@@ -114,8 +114,7 @@ public class EntityManager {
             DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new ResourcePersistenceException("Something went wrong while saving the object. (" + e.getMessage() + ")");
         }
     }
 
@@ -154,7 +153,7 @@ public class EntityManager {
                 NoSuchMethodException | InvocationTargetException |
                 InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            throw new ObjectNotFoundException("Something went wrong while fetching the object(s).");
+            throw new ObjectNotFoundException("Something went wrong while retrieving the object(s). (" + e.getMessage() + ")");
         }
     }
 }
