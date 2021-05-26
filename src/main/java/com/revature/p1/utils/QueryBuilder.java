@@ -54,7 +54,7 @@ public class QueryBuilder {
         sb.deleteCharAt(sb.lastIndexOf(",")).deleteCharAt(sb.lastIndexOf(" ")).append(");");
 
         try { //set objects for every field
-            stmt = connection.prepareStatement(sb.toString());
+            stmt = connection.prepareStatement(sb.toString(), new String[] {getFieldName(getPrimaryField(oClass))});
             int counter = 1;
             for (Field field : fields) {
                 if (field.isAnnotationPresent(Column.class)) {
@@ -168,7 +168,7 @@ public class QueryBuilder {
         String tableName = entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName;
 
         sb.append("create table ").append(tableName).append(" ( \n");
-        
+
         Arrays.stream(clazz.getDeclaredFields()).forEach(field -> sb.append(getFieldName(field)).append(" ")
                 .append(getSQLType(field)).append(!field.getAnnotation(Column.class).nullable() ? " not null, \n" : ", \n"));
         sb.append("primary key ").append(getFieldName(getPrimaryField(clazz))).append(",\n);"); //will implement foreign keys later (maybe)
@@ -177,7 +177,7 @@ public class QueryBuilder {
         return sb.toString();
     }
 
-    public <T> PreparedStatement getRowsOnCondition(Class<?> clazz, T condition, String column, Connection connection) {
+    public <T> String getRowsOnCondition(Class<?> clazz, T condition, String column) {
         Objects.requireNonNull(clazz);
         StringBuilder sb = new StringBuilder();
 
@@ -187,19 +187,15 @@ public class QueryBuilder {
         String entityName = clazz.getAnnotation(Entity.class).name();
         String tableName = entityName.isEmpty() ? clazz.getSimpleName().toLowerCase(Locale.ROOT) : entityName;
 
-        sb.append("select * from ").append(tableName).append(" where ").append(column).append(" = ").append(condition);
+        sb.append("select * from ").append(tableName).append(" where ").append(column).append(" = '").append(condition)
+        .append("'");
 
-        try {
-            return connection.prepareStatement(sb.toString());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return sb.toString();
     }
 
 
     @SuppressWarnings("unchecked")
-    private <T> T getPrimaryKey(T object) throws IllegalAccessException {
+    protected <T> T getPrimaryKey(T object) throws IllegalAccessException {
         Class<?> clazz = Objects.requireNonNull(object.getClass());
 
         if (!clazz.isAnnotationPresent(Entity.class))
@@ -214,14 +210,14 @@ public class QueryBuilder {
         return key;
     }
 
-    private Field getPrimaryField(Class<?> clazz) {
+    protected Field getPrimaryField(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Key.class))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("This entity does not have a primary key"));
 
     }
 
-    private <T> String getFieldName(Field field) {
+    protected  <T> String getFieldName(Field field) {
         // so don't have to type out this ternary every time
         return field.getAnnotation(Column.class).name().isEmpty()
                 ? field.getName().toLowerCase(Locale.ROOT) :

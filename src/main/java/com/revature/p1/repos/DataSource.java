@@ -14,9 +14,9 @@ public class DataSource implements ConnectionPool {
     private List<Connection> usedConnections = new ArrayList<>();
     private final int POOL_SIZE = 10;
     private static DataSource instance;
-    private String url;
-    private String login;
-    private String password;
+    private static String url;
+    private static String login;
+    private static String password;
 
     public static DataSource getInstance() {
         if(instance == null) {
@@ -73,16 +73,16 @@ public class DataSource implements ConnectionPool {
         return connectionPool.size() + usedConnections.size();
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public static void setUrl(String dbUrl) {
+       url = dbUrl;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public static void setLogin(String dbLogin) {
+        login = dbLogin;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public static void setPassword(String dbPassword) {
+        password = dbPassword;
     }
 
     public void shutdown() throws SQLException {

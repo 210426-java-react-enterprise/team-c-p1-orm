@@ -1,9 +1,11 @@
 package com.revature.p1.utils;
 
+import com.revature.p1.exceptions.ObjectNotFoundException;
 import com.revature.p1.repos.DataSource;
 import com.revature.p1.utils.annotations.Column;
 import jdk.nashorn.internal.objects.annotations.Where;
 
+import javax.xml.crypto.Data;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,16 +18,23 @@ public class EntityManager {
     private final QueryBuilder queryBuilder = new QueryBuilder();
 
     public EntityManager() {
+    }
 
+    public Connection getConnection() {
+        try {
+            return DataSource.getInstance().getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")
-    public <T, E> Object get(Class<?> clazz, T id) throws ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, InstantiationException, IllegalAccessException { //TODO clean this up
+    public <T, E> Object get(Class<?> clazz, T id) { //TODO clean this up
         Objects.requireNonNull(clazz);
         Objects.requireNonNull(id);
-        E object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
         try {
+            E object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
             Connection connection = DataSource.getInstance().getConnection();
             PreparedStatement stmt = queryBuilder.createSelectQueryFromClass(clazz, id, connection);
             ResultSet rs = stmt.executeQuery();
@@ -47,23 +56,21 @@ public class EntityManager {
             DataSource.getInstance().releaseConnection(connection);
             return object;
 
-        } catch (SQLException | IllegalAccessException e) {
+        } catch (SQLException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
+        } catch (InvocationTargetException | InstantiationException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
 
-
     public <T> boolean update(T object) {
         try {
             Connection connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
             PreparedStatement stmt = queryBuilder.createUpdateQueryFromObject(object, connection);
             stmt.executeUpdate();
-            connection.commit();
-            connection.setAutoCommit(true);
             DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException | IllegalAccessException e) {
@@ -72,19 +79,34 @@ public class EntityManager {
         }
     }
 
-    public <T> boolean save(T object) {
+    public <T> T save(T object) {
         try {
             Connection connection = DataSource.getInstance().getConnection();
             PreparedStatement stmt = queryBuilder.prepareInsertQueryFromObject(object, connection);
-            stmt.executeUpdate();
-            return true;
-        } catch (SQLException e) {
+            int rows = stmt.executeUpdate();
+
+            if(rows != 0) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                while (rs.next()) {
+                    Field field = queryBuilder.getPrimaryField(object.getClass());
+                    Method method = Arrays.stream(object.getClass().getDeclaredMethods()).
+                            filter(method1 -> method1.getName().substring(3).toLowerCase(Locale.ROOT).equals(field.getName().toLowerCase(Locale.ROOT)))
+                            .filter(method1 -> method1.getName().startsWith("set"))
+                            .findFirst()
+                            .orElseThrow(() -> new ObjectNotFoundException("unable to locate method field"));
+                    field.setAccessible(true);
+                    method.invoke(object, rs.getObject(queryBuilder.getFieldName(queryBuilder.getPrimaryField(object.getClass())))); //gross
+                    field.setAccessible(false);
+                }
+            }
+            return object;
+        } catch (SQLException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
-            return false;
+            throw new ObjectNotFoundException("Something went wrong while saving the object");
         }
     }
 
-    public <T> boolean delete (Class<?> clazz, T id) {
+    public <T> boolean delete(Class<?> clazz, T id) {
         try {
             Connection connection = DataSource.getInstance().getConnection();
             PreparedStatement stmt = queryBuilder.createDeleteQueryFromObject(clazz, id, connection);
@@ -98,37 +120,41 @@ public class EntityManager {
     }
 
     @SuppressWarnings("unchecked")
-    public <T, E> List<E> getAllOnCondition(Class<?> clazz, T condition, String column) {
+    public <T, E> List<E> getAllOnCondition(Class<?> clazz, String column, T condition) {
 
-        List<E> objects = new ArrayList<>();
-         try {
-             Connection connection = DataSource.getInstance().getConnection();
-             PreparedStatement stmt = queryBuilder.getRowsOnCondition(clazz, condition, column, connection);
-             ResultSet rs = stmt.executeQuery();
-             ResultSetMetaData rsmd = rs.getMetaData();
-             Field[] fields = clazz.getDeclaredFields();
+        try {
 
-             while (rs.next()) {
-                 E object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
-                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                     Field temp = fields[i - 1];
-                     temp.setAccessible(true);
-                     if (temp.getAnnotation(Column.class).isTimestamp()) { //Feels hacky. If it is isTimestamp, convert to DateTime.
-                         temp.set(object, rs.getTimestamp(i).toLocalDateTime());
-                         temp.setAccessible(false);
-                         continue;
-                     }
-                     temp.set(object, rs.getObject(i));
-                     temp.setAccessible(false);
-                 }
-                 objects.add(object);
-             }
-             return objects;
-         } catch (SQLException | ClassNotFoundException |
-                 NoSuchMethodException | InvocationTargetException |
-                 InstantiationException | IllegalAccessException e) {
-             e.printStackTrace();
-         }
-         return objects;
+            List<Object> objects = new ArrayList<>();
+            Connection connection = DataSource.getInstance().getConnection();
+            PreparedStatement stmt = connection.prepareStatement(queryBuilder.getRowsOnCondition(clazz, condition, column));
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            Field[] fields = clazz.getDeclaredFields();
+            E object;
+
+            while (rs.next()) {
+                object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    Field temp = fields[i - 1];
+                    temp.setAccessible(true);
+                    if (temp.getAnnotation(Column.class).isTimestamp()) { //Feels hacky. If it is isTimestamp, convert to DateTime.
+                        temp.set(object, rs.getTimestamp(i).toLocalDateTime());
+                        temp.setAccessible(false);
+                        continue;
+                    }
+                    temp.set(object, rs.getObject(i));
+                    temp.setAccessible(false);
+                }
+                objects.add(object);
+            }
+            DataSource.getInstance().releaseConnection(connection);
+            return (List<E>) objects;
+
+        } catch (SQLException | ClassNotFoundException |
+                NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            throw new ObjectNotFoundException("Something went wrong while fetching the object(s).");
+        }
     }
 }
