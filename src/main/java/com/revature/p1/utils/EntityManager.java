@@ -45,8 +45,8 @@ public class EntityManager {
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                     Field temp = fields[i - 1];
                     temp.setAccessible(true);
-                    if (temp.getAnnotation(Column.class).isTimestamp()) { //Feels hacky. If it is isTimestamp, convert to DateTime.
-                        temp.set(object, rs.getTimestamp(i).toLocalDateTime());
+                    if (temp.getAnnotation(Column.class).isDouble()) {
+                        temp.set(object, rs.getDouble(i));
                         temp.setAccessible(false);
                         continue;
                     }
@@ -75,7 +75,7 @@ public class EntityManager {
             DataSource.getInstance().releaseConnection(connection);
             return true;
         } catch (SQLException | IllegalAccessException e) {
-            throw new ResourcePersistenceException("Something went wrong while updating the object");
+            throw new ResourcePersistenceException("Something went wrong while updating the object. (" + e.getMessage() + ")");
         }
     }
 
@@ -136,8 +136,8 @@ public class EntityManager {
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                     Field temp = fields[i - 1];
                     temp.setAccessible(true);
-                    if (temp.getAnnotation(Column.class).isTimestamp()) { //Feels hacky. If it is isTimestamp, convert to DateTime.
-                        temp.set(object, rs.getTimestamp(i).toLocalDateTime());
+                    if (temp.getAnnotation(Column.class).isDouble()) {
+                        temp.set(object, rs.getDouble(i));
                         temp.setAccessible(false);
                         continue;
                     }
@@ -154,6 +154,41 @@ public class EntityManager {
                 InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
             throw new ObjectNotFoundException("Something went wrong while retrieving the object(s). (" + e.getMessage() + ")");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T, E> E getOneOnCondition(Class<?> clazz, String column, T condition) {
+
+        try {
+            Connection connection = DataSource.getInstance().getConnection();
+            PreparedStatement stmt = connection.prepareStatement(queryBuilder.getRowsOnCondition(clazz, condition, column));
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            Field[] fields = clazz.getDeclaredFields();
+            E object = null;
+
+            if (rs.next()) {
+                object = (E) Class.forName(clazz.getName()).getDeclaredConstructor().newInstance();
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    Field temp = fields[i - 1];
+                    temp.setAccessible(true);
+                    if (temp.getAnnotation(Column.class).isDouble()) {
+                        temp.set(object, rs.getDouble(i));
+                        temp.setAccessible(false);
+                        continue;
+                    }
+                    temp.set(object, rs.getObject(i));
+                    temp.setAccessible(false);
+                }
+            }
+            DataSource.getInstance().releaseConnection(connection);
+            return object;
+        } catch (SQLException | ClassNotFoundException |
+                NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            throw new ObjectNotFoundException("Something went wrong while retrieving the object. (" + e.getMessage() + ")");
         }
     }
 }

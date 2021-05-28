@@ -118,12 +118,12 @@ public class QueryBuilder {
                 String fieldName = field.getAnnotation(Column.class).name();
                 String columnName = fieldName.isEmpty() ? field.getName().toLowerCase(Locale.ROOT) : fieldName;
 
-                sb.append(columnName).append(" = ").append(field.get(object)).append(", ");
+                sb.append(columnName).append(" = '").append(field.get(object)).append("', ");
                 field.setAccessible(false);
             }
         }
         sb.deleteCharAt(sb.lastIndexOf(","));
-        sb.append("where ").append(primaryFieldName).append(" = ").append(getPrimaryKey(object)).append(";");
+        sb.append("where ").append(primaryFieldName).append(" = '").append(getPrimaryKey(object)).append("';");
 
         try {
             return connection.prepareStatement(sb.toString());

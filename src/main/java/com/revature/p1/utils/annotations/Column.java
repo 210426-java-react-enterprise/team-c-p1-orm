@@ -9,5 +9,6 @@ public @interface Column {
     String name() default "";
     boolean nullable() default true;
     boolean isTimestamp() default false;
+    boolean isDouble() default false;
     int length() default 50; //will maybe use this
 }
