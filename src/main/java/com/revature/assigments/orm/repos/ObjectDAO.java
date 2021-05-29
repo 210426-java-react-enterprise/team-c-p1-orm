@@ -13,7 +13,7 @@ import java.util.*;
 public class ObjectDAO {
 
 
-    public boolean saveInstance(Connection conn,
+    public boolean saveObject(Connection conn,
                                 ArrayList<String> objectMapSequence,
                                 TreeMap<String, ArrayList<String>> objectMapped,
                                 HashMap<String, ArrayList<String>> instanceMapped){

@@ -29,7 +29,7 @@ public class ObjectService {
      * @param object -- The object that is going to be sent to DB
      * @return -- Return a boolean TRUE (the obj was saved) FALSE (The obj wasn't save)
      */
-    public boolean sendInstanceToDB(Object object) {
+    public boolean sendObjectToDB(Object object) {
 
         TreeMap<String,ArrayList<String>> objectMapped;
         HashMap<String,ArrayList<String>> instanceMapped;
@@ -51,7 +51,7 @@ public class ObjectService {
             instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(object);
 
             //3.-Calling the DAO method
-            if(!objectDao.saveInstance(conn, objectMapSequence, objectMapped, instanceMapped)){
+            if(!objectDao.saveObject(conn, objectMapSequence, objectMapped, instanceMapped)){
                 connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
                 return false;
             }
