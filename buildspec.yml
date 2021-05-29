@@ -16,4 +16,4 @@ phases:
       - echo Build completed on `date`
 artifacts:
   files:
-    - target/p1-1.war
+    - target/orm-0.1.jar
