@@ -8,12 +8,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
-//import static com.revature.assigments.p1.MyCustomORMDriver.NUMOFCONNECTIONS;
 
 public class ConnectionFactory {
 
-    private static ConnectionFactory connectionFactory; // Lazy Singleton
-    private Properties props = new Properties();
+    private static ConnectionFactory connectionFactory = new ConnectionFactory();
 
     static{
         try{
@@ -23,35 +21,19 @@ public class ConnectionFactory {
         }
     }
 
-    private ConnectionFactory(){
-
-        try{
-
-        props.load(new FileReader("src/main/resources/connections/application.properties"));
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    private ConnectionFactory(){ }
 
     public static ConnectionFactory getInstance() {
-
-        if (connectionFactory == null){
-            connectionFactory = new ConnectionFactory();
-        }
 
         return connectionFactory;
     }
 
-    public Queue<Connection> getConnections(int numOfConnections){
+    public Queue<Connection> getConnections(String qtyOfConnections, String hostUrl, String dbUsername, String dbPassword){
         Queue<Connection> conns = new LinkedList<>();
         Connection conn=null;
         try{
-            for (int i = 0; i < numOfConnections; i++) {
-                conn = DriverManager.getConnection(props.getProperty("host-url"),props.getProperty("username"), props.getProperty("password"));
+            for (int i = 0; i < Integer.parseInt(qtyOfConnections); i++) {
+                conn = DriverManager.getConnection(hostUrl,dbUsername,dbPassword);
                 conns.add(conn);
             }
 
@@ -60,6 +42,5 @@ public class ConnectionFactory {
         }
         return conns;
     }
-
 
 }

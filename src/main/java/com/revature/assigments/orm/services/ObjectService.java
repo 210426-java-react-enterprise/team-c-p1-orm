@@ -1,5 +1,6 @@
 package com.revature.assigments.orm.services;
 
+import com.revature.assigments.orm.exceptions.ConnetionNotAvailable;
 import com.revature.assigments.orm.exceptions.ObjectNotFoundInDB;
 import com.revature.assigments.orm.repos.ObjectDAO;
 import com.revature.assigments.orm.repos.ConnectionPool;
@@ -38,7 +39,7 @@ public class ObjectService {
         //1.-Getting the connection from the pool
         try {
             conn = connectionPool.pollFromConnectionPool();
-        } catch (SQLException e) {
+        } catch (ConnetionNotAvailable e){
             System.out.println(e.getMessage());
         }
 
@@ -85,7 +86,7 @@ public class ObjectService {
         //1.-Getting the connection from the pool
         try {
             conn = connectionPool.pollFromConnectionPool();
-        } catch (SQLException e) {
+        } catch (ConnetionNotAvailable e) {
             System.out.println(e.getMessage());
         }
         //2.-Verifying and populating the support data structures
