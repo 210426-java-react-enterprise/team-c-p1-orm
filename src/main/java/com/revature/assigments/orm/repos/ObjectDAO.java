@@ -12,6 +12,7 @@ import java.util.*;
 
 public class ObjectDAO {
 
+
     public boolean saveInstance(Connection conn,
                                 ArrayList<String> objectMapSequence,
                                 TreeMap<String, ArrayList<String>> objectMapped,
@@ -23,36 +24,40 @@ public class ObjectDAO {
 
         //2.-Create @Entity Table
 
-        //2.1-Build create table query
+        //2.0.- Check if the Object Table exists in the DB
 
-        //2.1.1-Select [table_name]
-        StringBuilder createTableQuery= new StringBuilder("create table ");
-        createTableQuery.append(objectMapped.get("TABLE").get(0));
-        createTableQuery.append("( ");
+        if (!checkObjectTableInDB(conn, objectMapped)){
+            //2.1-Build create table query
 
-        //2.1.2.-Add columns with their respective specs >> check object map
-        for (String fieldKey: objectMapSequence) {
-            createTableQuery.append(fieldKey+" ");
-            for(String spec : objectMapped.get(fieldKey)){
-                if (!spec.isEmpty()){
-                    createTableQuery.append(spec+" ");
+            //2.1.1-Select [table_name]
+            StringBuilder createTableQuery= new StringBuilder("create table ");
+            createTableQuery.append(objectMapped.get("TABLE").get(0));
+            createTableQuery.append("( ");
+
+            //2.1.2.-Add columns with their respective specs >> check object map
+            for (String fieldKey: objectMapSequence) {
+                createTableQuery.append(fieldKey+" ");
+                for(String spec : objectMapped.get(fieldKey)){
+                    if (!spec.isEmpty()){
+                        createTableQuery.append(spec+" ");
+                    }
                 }
+                createTableQuery.append(", ");
             }
-            createTableQuery.append(", ");
-        }
-        //2.1.3.-Add constraints for PK and FK
-        createTableQuery.append(" constraint pk_"+objectMapped.get("TABLE").get(0)+" primary key ("+objectMapped.get("ID").get(0)+")");
+            //2.1.3.-Add constraints for PK and FK
+            createTableQuery.append(" constraint pk_"+objectMapped.get("TABLE").get(0)+" primary key ("+objectMapped.get("ID").get(0)+")");
 
-        createTableQuery.append(" );");
+            createTableQuery.append(" );");
 
-        //2.1.4-Execute the create table query
-        String sqlCreateTable=String.valueOf(createTableQuery);
-        try{
-            PreparedStatement pstmt = conn.prepareStatement(sqlCreateTable);
-            pstmt.execute();
+            //2.1.4-Execute the create table query
+            String sqlCreateTable=String.valueOf(createTableQuery);
+            try{
+                PreparedStatement pstmt = conn.prepareStatement(sqlCreateTable);
+                pstmt.execute();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
         }
 
         //3.-Insert Instance value in @Entity table
@@ -113,6 +118,24 @@ public class ObjectDAO {
         }
 
         //4.-Send status of the process
+        return false;
+    }
+
+    public boolean checkObjectTableInDB(Connection conn, TreeMap<String, ArrayList<String>> objectMapped){
+
+        StringBuilder selectQuery = new StringBuilder("select * from ");
+        selectQuery.append(objectMapped.get("TABLE").get(0) + ";");
+
+        try{
+            PreparedStatement pstmt = conn.prepareStatement(selectQuery.toString());
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
