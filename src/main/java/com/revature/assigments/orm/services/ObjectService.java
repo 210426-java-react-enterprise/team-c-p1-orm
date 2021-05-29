@@ -97,7 +97,7 @@ public class ObjectService {
             objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(object);
             //3.-Calling the DAO method to populate the Instance Map
 
-            objectDao.requestInstanceData(conn, object, objectId,objectMapSequence, objectMapped);
+            objectDao.requestObjectData(conn, object, objectId,objectMapSequence, objectMapped);
             //4.-Call the Object Mapper to populate the new Instance.O
             //After to talk with Wezley the only way to update my new instance is through reflection
 

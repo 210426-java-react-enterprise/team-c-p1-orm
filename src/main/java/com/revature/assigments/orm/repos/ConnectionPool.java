@@ -14,10 +14,10 @@ import java.util.Queue;
 
 public class ConnectionPool{
 
-    private Queue<Connection> connectionPool = new LinkedList<>();
+    private Queue<Connection> connectionsList = new LinkedList<>();
     private Properties props = new Properties();
-    private static final ConnectionPool connectionPoolInstance = new ConnectionPool();
 
+    private static final ConnectionPool connectionPool = new ConnectionPool();
 
     private ConnectionPool() {
 
@@ -34,7 +34,7 @@ public class ConnectionPool{
             e.printStackTrace();
         }
 
-        this.connectionPool = ConnectionFactory.getInstance().getConnections(props.getProperty("qty-connections"),
+        this.connectionsList = ConnectionFactory.getInstance().getConnections(props.getProperty("qty-connections"),
                                                                              props.getProperty("host-url"),
                                                                              props.getProperty("username"),
 
@@ -42,15 +42,15 @@ public class ConnectionPool{
     }
 
 
-    public static ConnectionPool getConnectionPool(){
-        return connectionPoolInstance;
+    public static ConnectionPool getInstance(){
+        return connectionPool;
     }
 
     public Connection pollFromConnectionPool() throws ConnetionNotAvailable {
         Connection conn=null;
 
-        if(connectionPool.peek()!=null){
-            conn = connectionPool.poll();
+        if(connectionsList.peek()!=null){
+            conn = connectionsList.poll();
         }else{
             throw new ConnetionNotAvailable ("No connection available!!!");
         }
@@ -59,11 +59,11 @@ public class ConnectionPool{
     }
 
     public boolean addToConnectionPool(Connection conn){
-        return connectionPool.add(conn);
+        return connectionsList.add(conn);
     }
 
     public void closeConnections(){
-       connectionPool.forEach( conn -> {
+       connectionsList.forEach( conn -> {
            try {
                conn.close();
            } catch (Exception throwables) {
@@ -73,7 +73,7 @@ public class ConnectionPool{
     }
 
     public int connectionsAvailable(){
-        return connectionPool.stream().toArray().length;
+        return connectionsList.stream().toArray().length;
     }
 
 }

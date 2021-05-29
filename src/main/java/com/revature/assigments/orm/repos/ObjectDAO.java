@@ -121,7 +121,7 @@ public class ObjectDAO {
         return false;
     }
 
-    public boolean checkObjectTableInDB(Connection conn, TreeMap<String, ArrayList<String>> objectMapped){
+    private boolean checkObjectTableInDB(Connection conn, TreeMap<String, ArrayList<String>> objectMapped){
 
         StringBuilder selectQuery = new StringBuilder("select * from ");
         selectQuery.append(objectMapped.get("TABLE").get(0) + ";");
@@ -129,14 +129,12 @@ public class ObjectDAO {
         try{
             PreparedStatement pstmt = conn.prepareStatement(selectQuery.toString());
             ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                return true;
-            }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     private String findDataType(HashMap<String, ArrayList<String>> instanceMapped, String key){
@@ -160,11 +158,11 @@ public class ObjectDAO {
      * @return
      * @throws ObjectNotFoundInDB
      */
-    public <T,E> Map<?,?>requestInstanceData(   Connection conn,
-                                                T object,
-                                                E objectId,
-                                                ArrayList<String> objectMapSequence,
-                                                TreeMap<String, ArrayList<String>> objectMapped) throws ObjectNotFoundInDB {
+    public <T,E> Map<?,?>requestObjectData( Connection conn,
+                                            T object,
+                                            E objectId,
+                                            ArrayList<String> objectMapSequence,
+                                            TreeMap<String, ArrayList<String>> objectMapped) throws ObjectNotFoundInDB {
 
 
 
