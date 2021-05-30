@@ -230,13 +230,11 @@ public class ObjectMapper {
                     throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
                 }
                 StringBuilder methodRequested = new StringBuilder("set"+field.getName());
-                Method[] objectMethods = objectClass.getMethods();
-                
-//                String testStr = objectMethods[1].getName().toLowerCase(Locale.ROOT);
-//                String testStr2 = Arrays.stream(objectMethods).findFirst().get().getName();
+                Method[] objectMethods = objectClass.getDeclaredMethods();
                 
                 for (int i = 0; i < Arrays.stream(objectMethods).count(); i++) {
                     if (objectMethods[i].getName().toLowerCase(Locale.ROOT).equals(methodRequested.toString())){
+                        
                         try {
                             
                             String[] stringArray = String.valueOf(field.getName()).split("\\.");
@@ -254,13 +252,23 @@ public class ObjectMapper {
                             
                             StringBuilder fieldClass = new StringBuilder();
                             fieldClass.append(field.getType()).append(".class");
+                            String finalFieldClass = String.valueOf(fieldClass);
                             
-                            objectMethods[i].invoke(object,_);
-                        } catch (IllegalAccessException e) {
+                            Method instanceMethod = objectClass.getMethod(finalMethodName,
+                                                                          Class.forName(finalFieldClass));
+                            
+                            instanceMethod.invoke(object,objectFieldsValuesRequestedFromDB.get(field.getName()).get(1));
+                            
+                        } catch (NoSuchMethodException e) {
                             e.printStackTrace();
                         } catch (InvocationTargetException e) {
                             e.printStackTrace();
-                        } };
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    };
                     }
                 }
                 

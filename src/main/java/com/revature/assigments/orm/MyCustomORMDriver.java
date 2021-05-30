@@ -46,8 +46,8 @@ public class MyCustomORMDriver {
 //        }
 
 
-        AppUser newAppUser = new AppUser();
-        newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
+        
+        AppUser newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
 
         connectionPool.closeConnections();
 

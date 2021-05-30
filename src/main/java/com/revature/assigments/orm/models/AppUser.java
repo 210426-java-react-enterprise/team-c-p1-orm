@@ -24,7 +24,6 @@ public class AppUser {
     private String lastName;
     @Column(name ="email", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
     private String email;
-    private ArrayList<AppAccount> accounts = new ArrayList<AppAccount>();
 
 
     public AppUser(){
@@ -86,18 +85,5 @@ public class AppUser {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public ArrayList<AppAccount> getAccounts() {
-        return accounts;
-    }
-
-    public void setAccounts(ArrayList<AppAccount> accounts) {
-        this.accounts = accounts;
-    }
-
-    public void addAccountToUser(AppAccount account){
-        this.accounts.add(account);
-    }
-
-
+    
 }
