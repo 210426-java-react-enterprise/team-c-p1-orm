@@ -29,6 +29,7 @@ public class ObjectService {
      * @param object -- The object that is going to be sent to DB
      * @return -- Return a boolean TRUE (the obj was saved) FALSE (The obj wasn't save)
      */
+    @SuppressWarnings("unchecked")
     public boolean sendObjectToDB(Object object) {
 
         TreeMap<String,ArrayList<String>> objectMapped;
@@ -47,8 +48,8 @@ public class ObjectService {
         try{
             ObjectMapper.verifyObjectClass(object);// Verifying if the object has the annotations @Entity and @Table
             objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(object);
-            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(object);
-            instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(object);
+            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createClassMapForDB(object);
+            instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMapForDB(object);
 
             //3.-Calling the DAO method
             if(!objectDao.saveObject(conn, objectMapSequence, objectMapped, instanceMapped)){
@@ -69,18 +70,20 @@ public class ObjectService {
      * the new instance requested
      *
      * @param T -- The class
-     * @param objectId -- The object Id to be able to read the DB and bring the info
+     * @param objectField -- The object Field to be able to filter the read of DB and bring the info
+     * @param objectFieldValue -- The object field value to apply the filter
      * @param <T>
      * @param <E>
      * @return -- The requested new instance of the class passed as input
      */
-    public <T,E> T bringInstanceFromDB(Class<?> T, E objectId){
+    @SuppressWarnings("unchecked")
+    public <T,E> T bringObjectFromDbByField(Class<?> T, E objectField, E objectFieldValue){
         Connection conn = null;
         Class<T> clazz = (Class<T>) T;
-        T object = (T) makeNewInstance(T);
+        T object = (T) makeNewInstance(T); // Here I create the new instance for the object
 
         TreeMap<String,ArrayList<String>> objectMapped;
-        HashMap<String,ArrayList<String>> instanceMapped;
+        HashMap<String,ArrayList<String>> objectFieldsValuesRequestedFromDB;
         ArrayList<String> objectMapSequence;
 
         //1.-Getting the connection from the pool
@@ -94,11 +97,20 @@ public class ObjectService {
             ObjectMapper.verifyObjectClass(object); // Verifying if the object has the annotations @Entity and @Table
 
             objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(object);
-            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createObjetMapForDB(object);
-            //3.-Calling the DAO method to populate the Instance Map
+            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createClassMapForDB(object);
+            //3.-Calling the DAO method to populate the Object Requested Map
 
-            objectDao.requestObjectData(conn, object, objectId,objectMapSequence, objectMapped);
+            objectFieldsValuesRequestedFromDB = (HashMap<String, ArrayList<String>>) objectDao.requestObjectDataByField(conn,
+                                                                                                            object,
+                                                                                                            objectField,
+                                                                                                            objectFieldValue,
+                                                                                                            objectMapSequence,
+                                                                                                            objectMapped);
+
             //4.-Call the Object Mapper to populate the new Instance.O
+            T Object = (T) ObjectMapper.updateNewInstance(object, objectFieldsValuesRequestedFromDB);
+
+
             //After to talk with Wezley the only way to update my new instance is through reflection
 
             //ChanMethod setIdMethod = object.getClass().getMethod("set")
@@ -108,7 +120,7 @@ public class ObjectService {
         }catch(ObjectNotFoundInDB e){
             System.out.println(e.getMessage());
         }catch (RuntimeException e2){
-            System.out.println(e2.getMessage());
+            e2.getStackTrace();
         }
 
         return null;
@@ -117,25 +129,19 @@ public class ObjectService {
     /**
      * This method create a new instance from the input class and return it
      * @param clazz -- This is the Class utilize to create the new instance
-     * @param <T>
      * @return -- Return the new Instance of the Class
      */
+    @SuppressWarnings("unchecked")
     public <T> T makeNewInstance(Class<T> clazz){
         try{
             Constructor<?> objectConstructor = clazz.getConstructor();
             Object object = Objects.requireNonNull(objectConstructor.newInstance());
             return (T) object;
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException | InstantiationException | NoSuchMethodException e) {
             e.printStackTrace();
         }
 
-       return null;
+        return null;
     }
 
 }

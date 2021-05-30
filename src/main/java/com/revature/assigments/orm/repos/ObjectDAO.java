@@ -150,28 +150,32 @@ public class ObjectDAO {
      * This method is responsible to bring the instance data from DB and return it as map
      * @param conn
      * @param object -- this is the object use to build the select statement
-     * @param objectId -- This is the column used in the select statement to bring the data in where the condition
+     * @param objectField -- This is the column to be include in the select statement where clause
+     * @param objectFieldValue -- This is the value that we'll use to filter the select statement
      * @param objectMapSequence
      * @param objectMapped
      * @param <T>
      * @param <E>
-     * @return
+     * @return -- Map with the requestedObject
      * @throws ObjectNotFoundInDB
      */
-    public <T,E> Map<?,?>requestObjectData( Connection conn,
-                                            T object,
-                                            E objectId,
-                                            ArrayList<String> objectMapSequence,
-                                            TreeMap<String, ArrayList<String>> objectMapped) throws ObjectNotFoundInDB {
+    public <T,E> Map<?,?>requestObjectDataByField( Connection conn,
+                                                   T object,
+                                                   E objectField,
+                                                   E objectFieldValue,
+                                                   ArrayList<String> objectMapSequence,
+                                                   TreeMap<String, ArrayList<String>> objectMapped) throws ObjectNotFoundInDB {
 
 
 
         //Mapping the instance MAP
-        HashMap<String, ArrayList<String>> instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createInstanceMapForDB(object);
+        HashMap<String, ArrayList<String>> objectRequestedMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMapForDB(object);
 
 
         //1-Create Select Statement to bring object data
-        StringBuilder selectQuery = new StringBuilder("select * from ").append(objectMapped.get("TABLE").get(0)).append(";");
+        StringBuilder selectQuery = new StringBuilder("select * from ").append(objectMapped.get("TABLE").get(0))
+                .append(" where "+objectField+"= '").append(objectFieldValue)
+                .append("';");
         try{
             PreparedStatement pstmt = conn.prepareStatement(String.valueOf(selectQuery));
             ResultSet rs = pstmt.executeQuery();
@@ -179,7 +183,7 @@ public class ObjectDAO {
             while (rs.next()){
                 //3.- Populate the instance Map with result from query
                 for (String str : objectMapSequence){
-                    instanceMapped.get(str).add(rs.getString(str));
+                    objectRequestedMapped.get(str).add(rs.getString(str));
                 }
             }
 
@@ -188,7 +192,7 @@ public class ObjectDAO {
             }
 
         //4.-Return the instance map with DB data
-        return instanceMapped;
+        return objectRequestedMapped;
     }
 
 }

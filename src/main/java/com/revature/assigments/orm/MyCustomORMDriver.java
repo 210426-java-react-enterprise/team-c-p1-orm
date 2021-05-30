@@ -35,19 +35,19 @@ public class MyCustomORMDriver {
 //            throwables.printStackTrace();
 //        }
 
+//HERE IS FINE
+//        AppUser appUserOut = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
+//        appUserOut.setId(1);
+//
+//        if(!objectService.sendObjectToDB(appUserOut)){
+//            System.out.println("The object COULDN'T be saved into DB");
+//        }else{
+//            System.out.println("The object was SAVED into DB");
+//        }
 
-        AppUser appUserOut = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
-        appUserOut.setId(1);
 
-        if(!objectService.sendObjectToDB(appUserOut)){
-            System.out.println("The object COULDN'T be saved into DB");
-        }else{
-            System.out.println("The object was SAVED into DB");
-        }
-
-
-
-//        objectService.bringInstanceFromDB(AppUser.class,1);
+        AppUser newAppUser = new AppUser();
+        newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
 
         connectionPool.closeConnections();
 

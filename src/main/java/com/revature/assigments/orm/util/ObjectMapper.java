@@ -7,7 +7,11 @@ import com.revature.assigments.orm.annotations.Table;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.lang.Character;
+import java.util.stream.Collectors;
 
 public class ObjectMapper {
 
@@ -25,7 +29,7 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static Map<?,?>createObjetMapForDB(Object object) {
+    public static Map<?,?>createClassMapForDB(Object object) {
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
 
@@ -93,7 +97,7 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static<T> Map<?,?>createInstanceMapForDB(T object){
+    public static<T> Map<?,?>createObjectMapForDB(T object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
         Map<String,ArrayList<String>> instanceMap = new HashMap<String,ArrayList<String>>();
@@ -193,6 +197,74 @@ public class ObjectMapper {
         if(!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)){
             throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
         }
+    }
+
+    public static <T> Object updateNewInstance(Object object, HashMap<String, ArrayList<String>> objectFieldsValuesRequestedFromDB){
+        Class<?> objectClass = Objects.requireNonNull(object.getClass());
+
+        //1.- Ensure that the respective object contains @Entity
+        if (!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)) {
+            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
+        }
+
+        //2.-Iterate every field from the class and update the values with the Map
+        Field[] objectClassFields = objectClass.getDeclaredFields();
+        for (Field field : objectClassFields) {
+            field.setAccessible(true);
+            Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+            for (Annotation annotation : fieldAnnotations) {
+                //2.-Adding @Column to the sequence
+
+                if (!field.isAnnotationPresent(Column.class)) {
+                    throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
+                }
+                StringBuilder methodRequested = new StringBuilder("set"+field.getName());
+                Method[] objectMethods = objectClass.getMethods();
+                
+//                String testStr = objectMethods[1].getName().toLowerCase(Locale.ROOT);
+//                String testStr2 = Arrays.stream(objectMethods).findFirst().get().getName();
+                
+                for (int i = 0; i < Arrays.stream(objectMethods).count(); i++) {
+                    if (objectMethods[i].getName().toLowerCase(Locale.ROOT).equals(methodRequested.toString())){
+                        try {
+                            
+                            String[] stringArray = String.valueOf(field.getName()).split("\\.");
+                            int methodNamePos = (stringArray.length)-1;
+                            
+                            char[] charArray = new char[stringArray[methodNamePos].length()];
+                            charArray = stringArray[methodNamePos].toString().toCharArray();
+                            charArray[0]=Character.toUpperCase(charArray[0]);
+                            String simpleFieldName = String.valueOf(charArray);
+                            
+                            StringBuilder simpleMethodName = new StringBuilder();
+                            simpleMethodName.append("set").append(simpleFieldName);
+                            
+                            String finalMethodName = String.valueOf(simpleMethodName);
+                            
+                            objectMethods[i].invoke(object,finalMethodName);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        } };
+                    }
+                }
+                
+//                Arrays.stream(objectClass.getMethods()).filter(method -> {
+//                                                                            return method.getName()..toLowerCase(Locale.ROOT).equals(methodRequested.toString().replace("_", ""));
+//                                                                         }).forEach(method -> {
+//                                                                                                try {
+//                                                                                                    method.invoke(object, objectFieldsValuesRequestedFromDB.get(field.getName()).get(1));
+//                                                                                                } catch (IllegalAccessException e) {
+//                                                                                                    e.printStackTrace();
+//                                                                                                } catch (InvocationTargetException e) {
+//                                                                                                    e.printStackTrace();
+//                                                                                                } });
+    
+            field.setAccessible(false);
+            }
+        
+        return object;
     }
 
 }
