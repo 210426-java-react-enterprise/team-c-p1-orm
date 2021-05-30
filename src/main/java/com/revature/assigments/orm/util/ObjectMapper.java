@@ -198,15 +198,26 @@ public class ObjectMapper {
             throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
         }
     }
-
+    
+    /**
+     *
+     * @param object
+     * @param objectFieldsValuesRequestedFromDB
+     * @param <T>
+     * @return
+     */
+    
     public static <T> Object updateNewInstance(Object object, HashMap<String, ArrayList<String>> objectFieldsValuesRequestedFromDB){
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
 
         //1.- Ensure that the respective object contains @Entity
-        if (!objectClass.isAnnotationPresent(Entity.class) && !objectClass.isAnnotationPresent(Table.class)) {
-            throw new RuntimeException(objectClass.getName() + " >> This object must contain @Entity and @Table to be mapped");
+        try{
+            verifyObjectClass(object);
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return null;
         }
-
+    
         //2.-Iterate every field from the class and update the values with the Map
         Field[] objectClassFields = objectClass.getDeclaredFields();
         for (Field field : objectClassFields) {
@@ -241,7 +252,10 @@ public class ObjectMapper {
                             
                             String finalMethodName = String.valueOf(simpleMethodName);
                             
-                            objectMethods[i].invoke(object,finalMethodName);
+                            StringBuilder fieldClass = new StringBuilder();
+                            fieldClass.append(field.getType()).append(".class");
+                            
+                            objectMethods[i].invoke(object,_);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         } catch (InvocationTargetException e) {
