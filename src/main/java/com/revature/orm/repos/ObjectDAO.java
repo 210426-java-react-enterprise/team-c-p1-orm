@@ -1,7 +1,7 @@
-package com.revature.assigments.orm.repos;
+package com.revature.orm.repos;
 
-import com.revature.assigments.orm.exceptions.ObjectNotFoundInDB;
-import com.revature.assigments.orm.util.ObjectMapper;
+import com.revature.orm.exceptions.ObjectNotFoundInDB;
+import com.revature.orm.util.ObjectMapper;
 
 import java.sql.*;
 import java.util.*;

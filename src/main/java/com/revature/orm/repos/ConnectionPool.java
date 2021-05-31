@@ -1,13 +1,12 @@
-package com.revature.assigments.orm.repos;
+package com.revature.orm.repos;
 
-import com.revature.assigments.orm.exceptions.ConnetionNotAvailable;
-import com.revature.assigments.orm.util.ConnectionFactory;
+import com.revature.orm.exceptions.ConnetionNotAvailable;
+import com.revature.orm.util.ConnectionFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Queue;

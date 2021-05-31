@@ -1,17 +1,13 @@
-package com.revature.assigments.orm.util;
+package com.revature.orm.util;
 
-import com.revature.assigments.orm.annotations.Column;
-import com.revature.assigments.orm.annotations.Entity;
-import com.revature.assigments.orm.annotations.Id;
-import com.revature.assigments.orm.annotations.Table;
+import com.revature.orm.annotations.Column;
+import com.revature.orm.annotations.Entity;
+import com.revature.orm.annotations.Id;
+import com.revature.orm.annotations.Table;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.lang.Character;
-import java.util.stream.Collectors;
 
 public class ObjectMapper {
 

@@ -1,4 +1,4 @@
-package com.revature.assigments.orm.exceptions;
+package com.revature.orm.exceptions;
 
 public class ConnetionNotAvailable extends Exception{
 

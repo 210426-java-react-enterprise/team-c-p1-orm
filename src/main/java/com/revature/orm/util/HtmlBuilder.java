@@ -1,4 +1,4 @@
-package com.revature.assigments.orm.util;
+package com.revature.orm.util;
 
 import java.util.Map;
 
