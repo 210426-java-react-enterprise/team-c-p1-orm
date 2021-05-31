@@ -35,7 +35,6 @@ public class ObjectService {
         HashMap<String,ArrayList<String>> classMap;
         HashMap<String,ArrayList<String>> objectMap;
         ArrayList<String> fieldSequence;
-        HashMap<String, String> columnFieldMap;
         Connection conn = null;
 
         //1.-Getting the connection from the pool
@@ -49,7 +48,6 @@ public class ObjectService {
         try{
             ObjectMapper.verifyObjectClass(object);// Verifying if the object has the annotations @Entity and @Table
             fieldSequence = (ArrayList<String>) ObjectMapper.createFieldSequence(object);
-            columnFieldMap = (HashMap<String, String>) ObjectMapper.createColumnFieldMap(object);
             classMap = (HashMap<String, ArrayList<String>>)  ObjectMapper.createClassMap(object);
             objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
 
@@ -66,6 +64,42 @@ public class ObjectService {
         connectionPool.addToConnectionPool(conn);//Returning the conn to the pool
         return true;
     }
+    
+    public boolean updateObjectinDB(Object object){
+        HashMap<String,ArrayList<String>> classMap;
+        HashMap<String,ArrayList<String>> objectMap;
+        ArrayList<String> fieldSequence;
+        Connection conn = null;
+    
+        //1.-Getting the connection from the pool
+        try {
+            conn = connectionPool.pollFromConnectionPool();
+        } catch (ConnetionNotAvailable e){
+            System.out.println(e.getMessage());
+        }
+    
+        //2.-Verifying and populating the support data structures
+        try{
+            ObjectMapper.verifyObjectClass(object);// Verifying if the object has the annotations @Entity and @Table
+            fieldSequence = (ArrayList<String>) ObjectMapper.createFieldSequence(object);
+            classMap = (HashMap<String, ArrayList<String>>)  ObjectMapper.createClassMap(object);
+            objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
+        
+            //3.-Calling the DAO method
+            if(!objectDao.updateObject(conn, fieldSequence, classMap, objectMap)){
+                connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
+                return false;
+            }
+        
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+        }
+    
+        connectionPool.addToConnectionPool(conn);//Returning the conn to the pool
+        return true;
+    }
+    
+    
 
     /**
      * This method is responsible to check the class file, get the conn and call the DAO method to populate

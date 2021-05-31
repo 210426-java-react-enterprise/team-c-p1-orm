@@ -47,7 +47,16 @@ public class MyCustomORMDriver {
 
 
         
-        AppUser newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "2");
+        AppUser newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
+        System.out.println(newAppUser.toString());
+        
+        newAppUser.setEmail("jane.doe@yahoo.com");
+        if(!objectService.updateObjectinDB(newAppUser)){
+            System.out.println("The object COULDN'T be updated into DB");
+        }else {
+            System.out.println("The object was updated into DB");
+        }
+    
         System.out.println(newAppUser.toString());
         
         connectionPool.closeConnections();

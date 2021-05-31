@@ -14,24 +14,18 @@ public class ObjectDAO {
                               ArrayList<String> fieldSequence,
                               HashMap<String, ArrayList<String>> classMap,
                               HashMap<String, ArrayList<String>> objectMap) {
-        
-        //1.-Check if @Entity table is in the DB >> Select * from @Entity
-        
-        //1.1-Drop Entity table
-        
-        //2.-Create @Entity Table
-        
-        //2.0.- Check if the Object Table exists in the DB
+
+        //1.0.- Check if the Object Table exists in the DB
         
         if (!checkObjectTableInDB(conn, classMap)) {
-            //2.1-Build create table query
+            //1.1-Build create table query
             
-            //2.1.1-Select [table_name]
+            //1.1.1-Select [table_name]
             StringBuilder createTableQuery = new StringBuilder("create table ");
             createTableQuery.append(classMap.get("TABLE").get(0));
             createTableQuery.append("( ");
             
-            //2.1.2.-Add columns with their respective specs >> check object map
+            //1.1.2.-Add columns with their respective specs >> check object map
             for (String fieldKey : fieldSequence) {
                 createTableQuery.append(fieldKey + " ");
                 for (int i = 0; i < classMap.get(fieldKey).size() - 2; i++) {
@@ -40,11 +34,11 @@ public class ObjectDAO {
 
                 createTableQuery.append(", ");
             }
-            //2.1.3.-Add constraints for PK and FK
+            //1.1.3.-Add constraints for PK and FK
             createTableQuery.append(" primary key (" +classMap.get("ID").get(0)+")");
             createTableQuery.append(" );");
             
-            //2.1.4-Execute the create table query
+            //1.1.4-Execute the create table query
             String sqlCreateTable = String.valueOf(createTableQuery);
             try {
                 PreparedStatement pstmt = conn.prepareStatement(sqlCreateTable);
@@ -55,8 +49,8 @@ public class ObjectDAO {
             }
         }
         
-        //3.-Insert Instance value in @Entity table
-        //3.1.-Build insert query
+        //2.-Insert Instance value in @Entity table
+        //2.1.-Build insert query
         StringBuilder insertTableQuery = new StringBuilder("insert");
         
         insertTableQuery.append(" into " + classMap.get("TABLE").get(0) + " (");
@@ -87,8 +81,7 @@ public class ObjectDAO {
     
                 switch (dataType) {
                     case "java.lang.String":
-                        pstmt.setString(i,
-                                        dataValue);
+                        pstmt.setString(i, dataValue);
                         break;
                     case "int":
                         pstmt.setInt(i,
@@ -116,21 +109,56 @@ public class ObjectDAO {
     
             int rowInserted = pstmt.executeUpdate();
             if ((rowInserted != 0)) {
-                //4.-Send status of the process
+                //3.-Send status of the process
                 return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        //4.-Send status of the process
+        //3.-Send status of the process
+        return false;
+    }
+    
+    public boolean updateObject (Connection conn,
+                                 ArrayList<String> fieldSequence,
+                                 HashMap<String, ArrayList<String>> classMap,
+                                 HashMap<String, ArrayList<String>> objectMap){
+        
+        //1.-Update object in db
+        //1.-Build update query
+        StringBuilder updateQuery = new StringBuilder();
+        updateQuery.append("update ").append(classMap.get("TABLE").get(0)).append(" set ");
+        fieldSequence.forEach(field -> {
+            if (!field.contains("id")){
+                updateQuery.append(field).append("=").append("'"+objectMap.get(field).get(1)+"', ");
+            }
+        });
+        updateQuery.delete((updateQuery.length() - 2),
+                                updateQuery.length());
+        
+        updateQuery.append("where ").append(classMap.get("ID").get(0)+"=").append(objectMap.get(classMap.get("ID").get(0)).get(1)).append(";");
+        String updateQueryString = updateQuery.toString();
+        //1.2.- Execute the query
+        try{
+        PreparedStatement pstmt = conn.prepareStatement(updateQueryString);
+        int rowInserted = pstmt.executeUpdate();
+        if ((rowInserted != 0)) {
+            //3.-Send status of the process
+            return true;
+            }
+        } catch (SQLException e) {
+        e.printStackTrace();
+        }
+        //2.-Send status of the process
+        
         return false;
     }
     
     private boolean checkObjectTableInDB(Connection conn, HashMap<String, ArrayList<String>> objectMapped) {
         
         StringBuilder selectQuery = new StringBuilder("select * from ");
-        selectQuery.append(objectMapped.get("TABLE").get(0) + ";");
+        selectQuery.append(objectMapped.get("TABLE").get(0)).append(";");
         
         try {
             PreparedStatement pstmt = conn.prepareStatement(selectQuery.toString());
