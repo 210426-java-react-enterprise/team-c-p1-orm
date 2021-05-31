@@ -29,7 +29,7 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static Map<?,?>createClassMapForDB(Object object) {
+    public static Map<?,?>createClassMap(Object object) {
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
 
@@ -73,7 +73,13 @@ public class ObjectMapper {
                 supportArray.add(field.getAnnotation(Column.class).dataType());
                 supportArray.add(field.getAnnotation(Column.class).unique());
                 supportArray.add(field.getAnnotation(Column.class).notNull());
-
+                supportArray.add(field.getName());
+                
+                String[] stringArray = String.valueOf(field.getType().getName()).split("\\.");
+                int simpleTypeNamePos = (stringArray.length)-1;
+                String simpleTypeName = stringArray[simpleTypeNamePos];
+                supportArray.add(simpleTypeName);
+                
                 objectMap.put(key, (ArrayList) supportArray.clone());
                 supportArray.clear();
 
@@ -97,7 +103,7 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
      */
-    public static<T> Map<?,?>createObjectMapForDB(T object){
+    public static<T> Map<?,?>createObjectMap(T object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
         Map<String,ArrayList<String>> instanceMap = new HashMap<String,ArrayList<String>>();
@@ -152,10 +158,12 @@ public class ObjectMapper {
      * @param object -- The respective object to read
      * @return ArrayList<String> with the sequence
      */
-    public static ArrayList<String> objectFieldSequence(Object object){
+    public static ArrayList<String> createObjectFieldSequence(Object object){
 
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
         ArrayList<String> sequence = new ArrayList<String>();
+        //HashMap<String,String> sequence = new HashMap<>();
+       
         //1.-Iterating the fields to get the annotations
         Field[] objectClassFields = objectClass.getDeclaredFields();
         for (Field field : objectClassFields) {
@@ -173,7 +181,8 @@ public class ObjectMapper {
                 String str = String.valueOf(support[supportPos].subSequence(0,2));
                 String strComp = "Id";
                 if(!str.equals(strComp)){
-                    sequence.add(field.getAnnotation(Column.class).name());
+                   sequence.add(field.getAnnotation(Column.class).name());
+                   //sequence.put(field.getName(),field.getAnnotation(Column.class).name());
                 }
             }
 
@@ -207,7 +216,11 @@ public class ObjectMapper {
      * @return
      */
     
-    public static <T> Object updateNewInstance(Object object, HashMap<String, ArrayList<String>> objectFieldsValuesRequestedFromDB){
+    public static <T> Object updateNewInstance(Object object,
+                                               ArrayList<String> classMapSequence,
+                                               HashMap<String, ArrayList<String>> classMap,
+                                               HashMap<String, String> objectFieldsValuesRequestedFromDB){
+        
         Class<?> objectClass = Objects.requireNonNull(object.getClass());
 
         //1.- Ensure that the respective object contains @Entity
@@ -229,47 +242,62 @@ public class ObjectMapper {
                 if (!field.isAnnotationPresent(Column.class)) {
                     throw new RuntimeException(objectClass.getName() + " >> This object must contains @Column to be able to mapped into a DB");
                 }
-                StringBuilder methodRequested = new StringBuilder("set"+field.getName());
-                Method[] objectMethods = objectClass.getDeclaredMethods();
-                
-                for (int i = 0; i < Arrays.stream(objectMethods).count(); i++) {
-                    if (objectMethods[i].getName().toLowerCase(Locale.ROOT).equals(methodRequested.toString())){
-                        
-                        try {
-                            
-                            String[] stringArray = String.valueOf(field.getName()).split("\\.");
-                            int methodNamePos = (stringArray.length)-1;
-                            
-                            char[] charArray = new char[stringArray[methodNamePos].length()];
-                            charArray = stringArray[methodNamePos].toString().toCharArray();
-                            charArray[0]=Character.toUpperCase(charArray[0]);
-                            String simpleFieldName = String.valueOf(charArray);
-                            
-                            StringBuilder simpleMethodName = new StringBuilder();
-                            simpleMethodName.append("set").append(simpleFieldName);
-                            
-                            String finalMethodName = String.valueOf(simpleMethodName);
-                            
-                            StringBuilder fieldClass = new StringBuilder();
-                            fieldClass.append(field.getType()).append(".class");
-                            String finalFieldClass = String.valueOf(fieldClass);
-                            
-                            Method instanceMethod = objectClass.getMethod(finalMethodName,
-                                                                          Class.forName(finalFieldClass));
-                            
-                            instanceMethod.invoke(object,objectFieldsValuesRequestedFromDB.get(field.getName()).get(1));
-                            
-                        } catch (NoSuchMethodException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    };
-                    }
+//                try{
+//                    String[] stringArray= String.valueOf(field.getName()).split("\\.");
+//
+//                    int fieldNamePos = (stringArray.length)-1;
+//
+//                    String fieldSimpleName = stringArray[fieldNamePos];
+//
+//
+//                  //  field.set(object,objectFieldsValuesRequestedFromDB.get(classMapSequence.get(fieldSimpleName)));
+//
+//                } catch (IllegalAccessException e) {
+//                    e.printStackTrace();
+//                }
+
+
+//                StringBuilder methodRequested = new StringBuilder("set"+field.getName());
+//                Method[] objectMethods = objectClass.getDeclaredMethods();
+//
+//                for (int i = 0; i < Arrays.stream(objectMethods).count(); i++) {
+//                    if (objectMethods[i].getName().toLowerCase(Locale.ROOT).equals(methodRequested.toString())){
+//
+//                        try {
+//
+//                            String[] stringArray = String.valueOf(field.getName()).split("\\.");
+//                            int methodNamePos = (stringArray.length)-1;
+//
+//                            char[] charArray = new char[stringArray[methodNamePos].length()];
+//                            charArray = stringArray[methodNamePos].toString().toCharArray();
+//                            charArray[0]=Character.toUpperCase(charArray[0]);
+//                            String simpleFieldName = String.valueOf(charArray);
+//
+//                            StringBuilder simpleMethodName = new StringBuilder();
+//                            simpleMethodName.append("set").append(simpleFieldName);
+//
+//                            String finalMethodName = String.valueOf(simpleMethodName);
+//
+//                            StringBuilder fieldClass = new StringBuilder();
+//                            fieldClass.append("java.lang.").append(field.getType());//.append(".class");
+//                            String finalFieldClass = String.valueOf(fieldClass);
+//
+//                            Method instanceMethod = objectClass.getMethod(finalMethodName,
+//                                                                          Class.forName(finalFieldClass));
+//
+//                            instanceMethod.invoke(object,objectFieldsValuesRequestedFromDB.get(field.getName()).get(1));
+//
+//                        } catch (NoSuchMethodException e) {
+//                            e.printStackTrace();
+//                        } catch (InvocationTargetException e) {
+//                            e.printStackTrace();
+//                        } catch (IllegalAccessException e) {
+//                            e.printStackTrace();
+//                        } catch (ClassNotFoundException e) {
+//                            e.printStackTrace();
+//                        }
+//                    };
+//                    }
                 }
                 
 //                Arrays.stream(objectClass.getMethods()).filter(method -> {

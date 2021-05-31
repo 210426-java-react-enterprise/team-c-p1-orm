@@ -32,9 +32,9 @@ public class ObjectService {
     @SuppressWarnings("unchecked")
     public boolean sendObjectToDB(Object object) {
 
-        TreeMap<String,ArrayList<String>> objectMapped;
-        HashMap<String,ArrayList<String>> instanceMapped;
-        ArrayList<String> objectMapSequence;
+        TreeMap<String,ArrayList<String>> classMap;
+        HashMap<String,ArrayList<String>> objectMap;
+        ArrayList<String> classMapSequence;
         Connection conn = null;
 
         //1.-Getting the connection from the pool
@@ -47,12 +47,12 @@ public class ObjectService {
         //2.-Verifying and populating the support data structures
         try{
             ObjectMapper.verifyObjectClass(object);// Verifying if the object has the annotations @Entity and @Table
-            objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(object);
-            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createClassMapForDB(object);
-            instanceMapped = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMapForDB(object);
+            classMapSequence = (ArrayList<String>) ObjectMapper.createObjectFieldSequence(object);
+            classMap = (TreeMap<String, ArrayList<String>>) ObjectMapper.createClassMap(object);
+            objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
 
             //3.-Calling the DAO method
-            if(!objectDao.saveObject(conn, objectMapSequence, objectMapped, instanceMapped)){
+            if(!objectDao.saveObject(conn, classMapSequence, classMap, objectMap)){
                 connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
                 return false;
             }
@@ -81,11 +81,12 @@ public class ObjectService {
         Connection conn = null;
         Class<T> clazz = (Class<T>) T;
         T object = (T) makeNewInstance(T); // Here I create the new instance for the object
-
-        TreeMap<String,ArrayList<String>> objectMapped;
-        HashMap<String,ArrayList<String>> objectFieldsValuesRequestedFromDB;
-        ArrayList<String> objectMapSequence;
-
+        
+        HashMap<String,String> objectFieldsValuesRequestedFromDB;
+        ArrayList<String> classMapSequence;
+        HashMap<String,ArrayList<String>> classMap;
+     
+        
         //1.-Getting the connection from the pool
         try {
             conn = connectionPool.pollFromConnectionPool();
@@ -95,20 +96,21 @@ public class ObjectService {
         //2.-Verifying and populating the support data structures
         try{
             ObjectMapper.verifyObjectClass(object); // Verifying if the object has the annotations @Entity and @Table
-
-            objectMapSequence = (ArrayList<String>) ObjectMapper.objectFieldSequence(object);
-            objectMapped = (TreeMap<String, ArrayList<String>>) ObjectMapper.createClassMapForDB(object);
+    
+            classMapSequence = (ArrayList<String>) ObjectMapper.createObjectFieldSequence(object);
+            //objectMapSequence = (HashMap <String,String>) ObjectMapper.createObjectFieldSequence(object);
+            classMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createClassMap(object);
             //3.-Calling the DAO method to populate the Object Requested Map
-
-            objectFieldsValuesRequestedFromDB = (HashMap<String, ArrayList<String>>) objectDao.requestObjectDataByField(conn,
+    
+            objectFieldsValuesRequestedFromDB = (HashMap<String, String>) objectDao.requestObjectDataByField(conn,
                                                                                                             object,
                                                                                                             objectField,
                                                                                                             objectFieldValue,
-                                                                                                            objectMapSequence,
-                                                                                                            objectMapped);
+                                                                                                            classMapSequence,
+                                                                                                            classMap);
 
             //4.-Call the Object Mapper to populate the new Instance.O
-            T Object = (T) ObjectMapper.updateNewInstance(object, objectFieldsValuesRequestedFromDB);
+            T Object = (T) ObjectMapper.updateNewInstance(object, classMapSequence, classMap, objectFieldsValuesRequestedFromDB);
 
 
             //After to talk with Wezley the only way to update my new instance is through reflection
