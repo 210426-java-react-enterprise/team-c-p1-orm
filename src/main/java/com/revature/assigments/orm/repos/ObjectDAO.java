@@ -11,9 +11,9 @@ public class ObjectDAO {
     
     
     public boolean saveObject(Connection conn,
-                              ArrayList<String> objectMapSequence,
-                              HashMap<String, ArrayList<String>> objectMapped,
-                              HashMap<String, ArrayList<String>> instanceMapped) {
+                              ArrayList<String> fieldSequence,
+                              HashMap<String, ArrayList<String>> classMap,
+                              HashMap<String, ArrayList<String>> objectMap) {
         
         //1.-Check if @Entity table is in the DB >> Select * from @Entity
         
@@ -23,28 +23,25 @@ public class ObjectDAO {
         
         //2.0.- Check if the Object Table exists in the DB
         
-        if (!checkObjectTableInDB(conn,
-                                  objectMapped)) {
+        if (!checkObjectTableInDB(conn, classMap)) {
             //2.1-Build create table query
             
             //2.1.1-Select [table_name]
             StringBuilder createTableQuery = new StringBuilder("create table ");
-            createTableQuery.append(objectMapped.get("TABLE").get(0));
+            createTableQuery.append(classMap.get("TABLE").get(0));
             createTableQuery.append("( ");
             
             //2.1.2.-Add columns with their respective specs >> check object map
-            for (String fieldKey : objectMapSequence) {
+            for (String fieldKey : fieldSequence) {
                 createTableQuery.append(fieldKey + " ");
-                for (String spec : objectMapped.get(fieldKey)) {
-                    if (!spec.isEmpty()) {
-                        createTableQuery.append(spec + " ");
-                    }
+                for (int i = 0; i < classMap.get(fieldKey).size() - 2; i++) {
+                    createTableQuery.append(classMap.get(fieldKey).get(i)+" ");
                 }
+
                 createTableQuery.append(", ");
             }
             //2.1.3.-Add constraints for PK and FK
-            createTableQuery.append(" constraint pk_" + objectMapped.get("TABLE").get(0) + " primary key (" + objectMapped.get("ID").get(0) + ")");
-            
+            createTableQuery.append(" primary key (" +classMap.get("ID").get(0)+")");
             createTableQuery.append(" );");
             
             //2.1.4-Execute the create table query
@@ -62,14 +59,14 @@ public class ObjectDAO {
         //3.1.-Build insert query
         StringBuilder insertTableQuery = new StringBuilder("insert");
         
-        insertTableQuery.append(" into " + objectMapped.get("TABLE").get(0) + " (");
-        for (String fieldKey : objectMapSequence) {
+        insertTableQuery.append(" into " + classMap.get("TABLE").get(0) + " (");
+        for (String fieldKey : fieldSequence) {
             insertTableQuery.append(fieldKey + ", ");
         }
         insertTableQuery.delete((insertTableQuery.length() - 2),
                                 insertTableQuery.length());
         insertTableQuery.append(") values (");
-        for (String fieldKey : objectMapSequence) {
+        for (String fieldKey : fieldSequence) {
             insertTableQuery.append("?,");
         }
         insertTableQuery.delete((insertTableQuery.length() - 1),
@@ -81,11 +78,11 @@ public class ObjectDAO {
         try {
             PreparedStatement pstmt = conn.prepareStatement(sqlInsertIntoTable);
             int i = 0;
-            for (String fieldKey : objectMapSequence) {
+            for (String fieldKey : fieldSequence) {
                 i++;
-                String dataType = findDataType(instanceMapped,
+                String dataType = findDataType(classMap,
                                                fieldKey);
-                String dataValue = findDataValue(instanceMapped,
+                String dataValue = findDataValue(objectMap,
                                                  fieldKey);
     
                 switch (dataType) {
@@ -110,6 +107,8 @@ public class ObjectDAO {
                                          Boolean.valueOf(dataValue));
                         break;
                     default:
+                        pstmt.setString(i,
+                                        dataValue);
                         break;
                 }
     
@@ -144,13 +143,13 @@ public class ObjectDAO {
         return true;
     }
     
-    private String findDataType(HashMap<String, ArrayList<String>> instanceMapped, String key) {
+    private String findDataType(HashMap<String, ArrayList<String>> classMap, String key) {
         
-        return instanceMapped.get(key).get(0);
+        return classMap.get(key).get(4);
     }
     
-    private String findDataValue(HashMap<String, ArrayList<String>> instanceMapped, String key) {
-        return instanceMapped.get(key).get(1);
+    private String findDataValue(HashMap<String, ArrayList<String>> objectMap, String key) {
+        return objectMap.get(key).get(1);
     }
     
     /**
@@ -189,7 +188,7 @@ public class ObjectDAO {
             //2- Check if the select statement brought data from DB
             while (rs.next()) {
                 //3.- Populate the object Map with result from query
-                for (int i=0; i <= rsMetaData.getColumnCount(); i++){
+                for (int i=1; i <= rsMetaData.getColumnCount(); i++){
                     int finalI = i;
                     classMap.forEach((key, value)->{
                         int pos = finalI;

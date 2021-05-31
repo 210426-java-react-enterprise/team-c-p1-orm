@@ -16,11 +16,11 @@ public class AppUser {
     private int id;
     @Column(name ="username", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
     private  String username;
-    @Column(name ="password", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
+    @Column(name ="password", dataType = "varchar(256)", unique = "", notNull = "not null" )
     private String password;
-    @Column(name ="first_name", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
+    @Column(name ="first_name", dataType = "varchar(256)", unique = "", notNull = "not null" )
     private String firstName;
-    @Column(name ="last_name", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
+    @Column(name ="last_name", dataType = "varchar(256)", unique = "", notNull = "not null" )
     private String lastName;
     @Column(name ="email", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
     private String email;
@@ -86,4 +86,15 @@ public class AppUser {
         this.email = email;
     }
     
+    @Override
+    public String toString() {
+        return "AppUser{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }

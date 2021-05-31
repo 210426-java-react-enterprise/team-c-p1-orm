@@ -113,12 +113,7 @@ public class ObjectService {
 
             //4.-Call the Object Mapper to populate the new Instance.O
             T Object = (T) ObjectMapper.updateNewInstance(object, columnFieldMap, classMap, objectFieldsValuesRequestedFromDB);
-
-
-            //After to talk with Wezley the only way to update my new instance is through reflection
-
-            //ChanMethod setIdMethod = object.getClass().getMethod("set")
-
+            
             return (T) object;
 
         }catch(ObjectNotFoundInDB e){

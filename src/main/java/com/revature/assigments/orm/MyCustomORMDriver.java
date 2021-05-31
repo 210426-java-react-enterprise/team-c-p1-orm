@@ -36,8 +36,8 @@ public class MyCustomORMDriver {
 //        }
 
 //HERE IS FINE
-//        AppUser appUserOut = new AppUser("jane.doe","password","Jane","Doe","jane.doe@gmail.com");
-//        appUserOut.setId(1);
+//        AppUser appUserOut = new AppUser("john.doe","p4ssw0rd","John","Doe","john.doe@gmail.com");
+//        appUserOut.setId(2);
 //
 //        if(!objectService.sendObjectToDB(appUserOut)){
 //            System.out.println("The object COULDN'T be saved into DB");
@@ -47,8 +47,9 @@ public class MyCustomORMDriver {
 
 
         
-        AppUser newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
-
+        AppUser newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "2");
+        System.out.println(newAppUser.toString());
+        
         connectionPool.closeConnections();
 
     }
