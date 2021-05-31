@@ -1,5 +1,6 @@
 package com.revature.assigments.orm;
 
+import com.revature.assigments.orm.models.AppAccount;
 import com.revature.assigments.orm.models.AppUser;
 import com.revature.assigments.orm.repos.ObjectDAO;
 import com.revature.assigments.orm.repos.ConnectionPool;
@@ -47,23 +48,55 @@ public class MyCustomORMDriver {
 
 
         
-        AppUser newAppUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
-        System.out.println(newAppUser.toString());
-        
-        newAppUser.setEmail("jane.doe@yahoo.com");
-        if(!objectService.updateObjectinDB(newAppUser)){
-            System.out.println("The object COULDN'T be updated into DB");
-        }else {
-            System.out.println("The object was updated into DB");
-        }
+//        AppUser newUser = objectService.bringObjectFromDbByField(AppUser.class,"user_id", "1");
+//        System.out.println(newUser.toString());
+//
+//        newUser.setEmail("jane.doe@yahoo.com");
+//        if(!objectService.updateObjectinDB(newUser)){
+//            System.out.println("The object COULDN'T be updated into DB");
+//        }else {
+//            System.out.println("The object was updated into DB");
+//        }
     
-        System.out.println(newAppUser.toString());
+//        System.out.println("----------------------------------------------");
+//
+//        AppUser otherUser = new AppUser("alice.doe","passw0rd","Alice","Doe","alice@outlook.com");
+//
+//        otherUser.setId(3);
+//
+//        if(!objectService.sendObjectToDB(otherUser)){
+//            System.out.println("The object COULDN'T be saved into DB");
+//        }else{
+//            System.out.println("The object was SAVED into DB");
+//        }
+//
+//        System.out.println(otherUser.toString());
+//
+//        System.out.println("----------------------------------------------");
+//
+//        if(!objectService.deleteObjectInDB(otherUser)){
+//            System.out.println("The object COULDN'T be delete into DB");
+//        }else{
+//            System.out.println("The object was delete it");
+//        }
+//
+//        System.out.println("----------------------------------------------");
+        
+        AppAccount newAccount = new AppAccount(1,"Saving","USD",300,1);
+        
+        System.out.println(newAccount.toString());
+        
+        if(!objectService.sendObjectToDB(newAccount)){
+            System.out.println("The object COULDN'T be saved into DB");
+        }else{
+            System.out.println("The object was SAVED into DB");
+        }
+        
+        System.out.println("----------------------------------------------");
         
         connectionPool.closeConnections();
-
     }
-
-
-    private static class bringInstanceFromDB extends AppUser {
-    }
+    
+    
+    
 }

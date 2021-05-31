@@ -25,7 +25,6 @@ public class AppUser {
     @Column(name ="email", dataType = "varchar(256)", unique = "unique", notNull = "not null" )
     private String email;
 
-
     public AppUser(){
         super();
     }

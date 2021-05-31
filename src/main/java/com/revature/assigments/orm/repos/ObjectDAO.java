@@ -9,7 +9,14 @@ import java.util.*;
 
 public class ObjectDAO {
     
-    
+    /**
+     *  This method build the query to insert the object
+     * @param conn
+     * @param fieldSequence -- This sequence help to build first part of the query
+     * @param classMap -- This map contains the class info to create the table
+     * @param objectMap -- This map contains the object info to be saved
+     * @return -- TRUE if the object was saved and FALSE if the object wasn't saved
+     */
     public boolean saveObject(Connection conn,
                               ArrayList<String> fieldSequence,
                               HashMap<String, ArrayList<String>> classMap,
@@ -120,6 +127,15 @@ public class ObjectDAO {
         return false;
     }
     
+    /**
+     * this method is responsible to update the object in DB, It's takes the entire object and with the ID proceed
+     * to update
+     * @param conn
+     * @param fieldSequence -- This is the sequence use it to build the query
+     * @param classMap
+     * @param objectMap
+     * @return -- TRUE if the object was updated it and FALSE wasn't updated
+     */
     public boolean updateObject (Connection conn,
                                  ArrayList<String> fieldSequence,
                                  HashMap<String, ArrayList<String>> classMap,
@@ -144,7 +160,7 @@ public class ObjectDAO {
         PreparedStatement pstmt = conn.prepareStatement(updateQueryString);
         int rowInserted = pstmt.executeUpdate();
         if ((rowInserted != 0)) {
-            //3.-Send status of the process
+            //2.-Send status of the process
             return true;
             }
         } catch (SQLException e) {
@@ -155,6 +171,12 @@ public class ObjectDAO {
         return false;
     }
     
+    /**
+     * This method is responsible to check if the object is already in the DB
+     * @param conn
+     * @param objectMapped
+     * @return - TRUE is the object is in the DB and FALSE is not in the DB
+     */
     private boolean checkObjectTableInDB(Connection conn, HashMap<String, ArrayList<String>> objectMapped) {
         
         StringBuilder selectQuery = new StringBuilder("select * from ");
@@ -171,11 +193,55 @@ public class ObjectDAO {
         return true;
     }
     
+    public boolean deleteObject (Connection conn,
+                                 HashMap<String, ArrayList<String>> classMap,
+                                 HashMap<String, ArrayList<String>> objectMap){
+        
+        //1.-Update object in db
+        //1.-Build delete query
+        StringBuilder deleteQuery = new StringBuilder();
+        deleteQuery.append("delete from ")
+                   .append(classMap.get("TABLE").get(0))
+                   .append(" where ")
+                   .append(classMap.get("ID")
+                   .get(0)).append("=")
+                   .append(objectMap.get(classMap.get("ID").get(0)).get(1))
+                   .append(";");
+        
+        String deleteQueryString = deleteQuery.toString();
+        //1.2.- Execute the query
+        try{
+            PreparedStatement pstmt = conn.prepareStatement(deleteQueryString);
+            int rowInserted = pstmt.executeUpdate();
+            if ((rowInserted != 0)) {
+                //2.-Send status of the process
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        //2.-Send status of the process
+        
+        return false;
+    }
+    
+    /**
+     * This methedo find the Data Type inside the class map
+     * @param classMap
+     * @param key
+     * @return - The Data Type for the key
+     */
     private String findDataType(HashMap<String, ArrayList<String>> classMap, String key) {
         
         return classMap.get(key).get(4);
     }
     
+    /**
+     * This method find the Data Value inside the class map
+     * @param objectMap
+     * @param key
+     * @return - The Data Value for the key
+     */
     private String findDataValue(HashMap<String, ArrayList<String>> objectMap, String key) {
         return objectMap.get(key).get(1);
     }

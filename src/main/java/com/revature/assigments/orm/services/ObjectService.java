@@ -51,9 +51,10 @@ public class ObjectService {
             classMap = (HashMap<String, ArrayList<String>>)  ObjectMapper.createClassMap(object);
             objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
 
-            //3.-Calling the DAO method
+            //3.-Calling the DAO method to save
             if(!objectDao.saveObject(conn, fieldSequence, classMap, objectMap)){
                 connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
+                //4.-Return task's status
                 return false;
             }
 
@@ -62,15 +63,22 @@ public class ObjectService {
         }
 
         connectionPool.addToConnectionPool(conn);//Returning the conn to the pool
+        //4.-Return task's status
         return true;
     }
     
+    /**
+     * This method takes the object to verify it has the annotation @Entity and @Table, and if it passes it calls
+     * the correspondent DAO method to build the query and update the object
+     * @param object -- The object that is going to be update in DB
+     * @return -- Return a boolean TRUE (the obj was updated) FALSE (The obj wasn't updated)
+     */
     public boolean updateObjectinDB(Object object){
         HashMap<String,ArrayList<String>> classMap;
         HashMap<String,ArrayList<String>> objectMap;
         ArrayList<String> fieldSequence;
         Connection conn = null;
-    
+        
         //1.-Getting the connection from the pool
         try {
             conn = connectionPool.pollFromConnectionPool();
@@ -85,9 +93,10 @@ public class ObjectService {
             classMap = (HashMap<String, ArrayList<String>>)  ObjectMapper.createClassMap(object);
             objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
         
-            //3.-Calling the DAO method
+            //3.-Calling the DAO method to update
             if(!objectDao.updateObject(conn, fieldSequence, classMap, objectMap)){
                 connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
+                //4.-Return task's status
                 return false;
             }
         
@@ -96,6 +105,43 @@ public class ObjectService {
         }
     
         connectionPool.addToConnectionPool(conn);//Returning the conn to the pool
+        return true;
+    }
+    
+    public boolean deleteObjectInDB(Object object){
+        
+        HashMap<String,ArrayList<String>> classMap;
+        HashMap<String,ArrayList<String>> objectMap;
+        ArrayList<String> fieldSequence;
+        Connection conn = null;
+    
+        //1.-Getting the connection from the pool
+        try {
+            conn = connectionPool.pollFromConnectionPool();
+        } catch (ConnetionNotAvailable e){
+            System.out.println(e.getMessage());
+        }
+        //2.-Verifying and populating the support data structures
+        try{
+            ObjectMapper.verifyObjectClass(object);// Verifying if the object has the annotations @Entity and @Table
+            fieldSequence = (ArrayList<String>) ObjectMapper.createFieldSequence(object);
+            classMap = (HashMap<String, ArrayList<String>>)  ObjectMapper.createClassMap(object);
+            objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
+        
+            //3.-Calling the DAO method to delete
+            if(!objectDao.deleteObject(conn, classMap, objectMap)){
+                connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
+                //4.-Return task's status
+                return false;
+            }
+        
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+        }
+    
+        connectionPool.addToConnectionPool(conn);//Returning the conn to the pool
+        
+        //4.-Return task's status
         return true;
     }
     
@@ -148,6 +194,7 @@ public class ObjectService {
             //4.-Call the Object Mapper to populate the new Instance.O
             T Object = (T) ObjectMapper.updateNewInstance(object, columnFieldMap, classMap, objectFieldsValuesRequestedFromDB);
             
+            //5.- Return the object
             return (T) object;
 
         }catch(ObjectNotFoundInDB e){
@@ -155,7 +202,8 @@ public class ObjectService {
         }catch (RuntimeException e2){
             e2.getStackTrace();
         }
-
+        
+        //5.- Return the object
         return null;
     }
 
