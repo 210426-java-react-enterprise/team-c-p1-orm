@@ -32,9 +32,10 @@ public class ObjectService {
     @SuppressWarnings("unchecked")
     public boolean sendObjectToDB(Object object) {
 
-        TreeMap<String,ArrayList<String>> classMap;
+        HashMap<String,ArrayList<String>> classMap;
         HashMap<String,ArrayList<String>> objectMap;
-        ArrayList<String> classMapSequence;
+        ArrayList<String> fieldSequence;
+        HashMap<String, String> columnFieldMap;
         Connection conn = null;
 
         //1.-Getting the connection from the pool
@@ -47,12 +48,13 @@ public class ObjectService {
         //2.-Verifying and populating the support data structures
         try{
             ObjectMapper.verifyObjectClass(object);// Verifying if the object has the annotations @Entity and @Table
-            classMapSequence = (ArrayList<String>) ObjectMapper.createObjectFieldSequence(object);
-            classMap = (TreeMap<String, ArrayList<String>>) ObjectMapper.createClassMap(object);
+            fieldSequence = (ArrayList<String>) ObjectMapper.createFieldSequence(object);
+            columnFieldMap = (HashMap<String, String>) ObjectMapper.createColumnFieldMap(object);
+            classMap = (HashMap<String, ArrayList<String>>)  ObjectMapper.createClassMap(object);
             objectMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createObjectMap(object);
 
             //3.-Calling the DAO method
-            if(!objectDao.saveObject(conn, classMapSequence, classMap, objectMap)){
+            if(!objectDao.saveObject(conn, fieldSequence, classMap, objectMap)){
                 connectionPool.addToConnectionPool(conn);//Returning de conn to the pool
                 return false;
             }
@@ -83,7 +85,8 @@ public class ObjectService {
         T object = (T) makeNewInstance(T); // Here I create the new instance for the object
         
         HashMap<String,String> objectFieldsValuesRequestedFromDB;
-        ArrayList<String> classMapSequence;
+        ArrayList<String> fieldSequence;
+        HashMap<String, String> columnFieldMap;
         HashMap<String,ArrayList<String>> classMap;
      
         
@@ -97,8 +100,8 @@ public class ObjectService {
         try{
             ObjectMapper.verifyObjectClass(object); // Verifying if the object has the annotations @Entity and @Table
     
-            classMapSequence = (ArrayList<String>) ObjectMapper.createObjectFieldSequence(object);
-            //objectMapSequence = (HashMap <String,String>) ObjectMapper.createObjectFieldSequence(object);
+            fieldSequence = (ArrayList<String>) ObjectMapper.createFieldSequence(object);
+            columnFieldMap = (HashMap<String, String>) ObjectMapper.createColumnFieldMap(object);
             classMap = (HashMap<String, ArrayList<String>>) ObjectMapper.createClassMap(object);
             //3.-Calling the DAO method to populate the Object Requested Map
     
@@ -106,11 +109,10 @@ public class ObjectService {
                                                                                                             object,
                                                                                                             objectField,
                                                                                                             objectFieldValue,
-                                                                                                            classMapSequence,
                                                                                                             classMap);
 
             //4.-Call the Object Mapper to populate the new Instance.O
-            T Object = (T) ObjectMapper.updateNewInstance(object, classMapSequence, classMap, objectFieldsValuesRequestedFromDB);
+            T Object = (T) ObjectMapper.updateNewInstance(object, columnFieldMap, classMap, objectFieldsValuesRequestedFromDB);
 
 
             //After to talk with Wezley the only way to update my new instance is through reflection

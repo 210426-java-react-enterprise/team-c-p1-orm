@@ -12,7 +12,7 @@ public class ObjectDAO {
     
     public boolean saveObject(Connection conn,
                               ArrayList<String> objectMapSequence,
-                              TreeMap<String, ArrayList<String>> objectMapped,
+                              HashMap<String, ArrayList<String>> objectMapped,
                               HashMap<String, ArrayList<String>> instanceMapped) {
         
         //1.-Check if @Entity table is in the DB >> Select * from @Entity
@@ -128,7 +128,7 @@ public class ObjectDAO {
         return false;
     }
     
-    private boolean checkObjectTableInDB(Connection conn, TreeMap<String, ArrayList<String>> objectMapped) {
+    private boolean checkObjectTableInDB(Connection conn, HashMap<String, ArrayList<String>> objectMapped) {
         
         StringBuilder selectQuery = new StringBuilder("select * from ");
         selectQuery.append(objectMapped.get("TABLE").get(0) + ";");
@@ -160,7 +160,6 @@ public class ObjectDAO {
      * @param object           -- this is the object use to build the select statement
      * @param objectField      -- This is the column to be include in the select statement where clause
      * @param objectFieldValue -- This is the value that we'll use to filter the select statement
-     * @param classMapSequence
      * @param classMap
      * @param <T>
      * @param <E>
@@ -171,7 +170,6 @@ public class ObjectDAO {
                                                      T object,
                                                      E objectField,
                                                      E objectFieldValue,
-                                                     ArrayList<String> classMapSequence,
                                                      HashMap<String, ArrayList<String>> classMap) throws ObjectNotFoundInDB {
     
     
@@ -191,7 +189,7 @@ public class ObjectDAO {
             //2- Check if the select statement brought data from DB
             while (rs.next()) {
                 //3.- Populate the object Map with result from query
-                for (int i=0; i < rsMetaData.getColumnCount(); i++){
+                for (int i=0; i <= rsMetaData.getColumnCount(); i++){
                     int finalI = i;
                     classMap.forEach((key, value)->{
                         int pos = finalI;
