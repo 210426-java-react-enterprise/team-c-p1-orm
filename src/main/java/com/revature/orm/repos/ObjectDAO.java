@@ -1,6 +1,7 @@
 package com.revature.orm.repos;
 
 import com.revature.orm.exceptions.ObjectNotFoundInDB;
+import com.revature.orm.services.ObjectService;
 import com.revature.orm.util.ObjectMapper;
 
 import java.sql.*;
@@ -8,6 +9,10 @@ import java.util.*;
 
 
 public class ObjectDAO {
+    
+    private static final ObjectDAO objectDAO = new ObjectDAO();
+    
+    public static ObjectDAO getInstance(){return objectDAO;}
     
     /**
      *  This method build the query to insert the object

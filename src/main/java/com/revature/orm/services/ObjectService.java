@@ -14,13 +14,18 @@ import java.util.*;
 public class ObjectService {
     private ObjectDAO objectDao;
     private ConnectionPool connectionPool;
-
+    
+    private static final ObjectService objectService = new ObjectService(ObjectDAO.getInstance(), ConnectionPool.getInstance());
 
     public ObjectService(ObjectDAO objectDao, ConnectionPool connectionPool) {
         this.objectDao = objectDao;
         this.connectionPool = connectionPool;
     }
-
+    
+    public static ObjectService getInstance(){
+        return objectService;
+    }
+    
     /**
      * This method takes the object to verify it has the annotation @Entity and @Table, and if it passes it calls
      * the correspondent DAO method to build the query and send it to DB
