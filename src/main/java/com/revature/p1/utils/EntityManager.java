@@ -50,6 +50,11 @@ public class EntityManager {
                         temp.setAccessible(false);
                         continue;
                     }
+                    if (temp.getAnnotation(Column.class).isTimestamp()) {
+                        temp.set(object, rs.getTimestamp(i).toLocalDateTime());
+                        temp.setAccessible(false);
+                        continue;
+                    }
                     temp.set(object, rs.getObject(i));
                     temp.setAccessible(false);
                 }
@@ -141,6 +146,11 @@ public class EntityManager {
                         temp.setAccessible(false);
                         continue;
                     }
+                    if (temp.getAnnotation(Column.class).isTimestamp()) {
+                        temp.set(object, rs.getTimestamp(i).toLocalDateTime());
+                        temp.setAccessible(false);
+                        continue;
+                    }
                     temp.set(object, rs.getObject(i));
                     temp.setAccessible(false);
                 }
@@ -175,6 +185,11 @@ public class EntityManager {
                     temp.setAccessible(true);
                     if (temp.getAnnotation(Column.class).isDouble()) {
                         temp.set(object, rs.getDouble(i));
+                        temp.setAccessible(false);
+                        continue;
+                    }
+                    if (temp.getAnnotation(Column.class).isTimestamp()) {
+                        temp.set(object, rs.getTimestamp(i).toLocalDateTime());
                         temp.setAccessible(false);
                         continue;
                     }
