@@ -146,6 +146,7 @@ public class ObjectService {
         connectionPool.addToConnectionPool(conn);//Returning the conn to the pool
         
         //4.-Return task's status
+        
         return true;
     }
     
@@ -199,6 +200,7 @@ public class ObjectService {
             T Object = (T) ObjectMapper.updateNewInstance(object, columnFieldMap, classMap, objectFieldsValuesRequestedFromDB);
             
             //5.- Return the object
+            connectionPool.addToConnectionPool(conn);
             return (T) object;
 
         }catch(ObjectNotFoundInDB e){
@@ -208,6 +210,7 @@ public class ObjectService {
         }
         
         //5.- Return the object
+        connectionPool.addToConnectionPool(conn);
         return null;
     }
 
