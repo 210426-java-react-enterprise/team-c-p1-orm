@@ -77,7 +77,7 @@ public class ObjectService {
      * @param object -- The object that is going to be update in DB
      * @return -- Return a boolean TRUE (the obj was updated) FALSE (The obj wasn't updated)
      */
-    public boolean updateObjectinDB(Object object){
+    public boolean updateObjectInDB(Object object){
         HashMap<String,ArrayList<String>> classMap;
         HashMap<String,ArrayList<String>> objectMap;
         ArrayList<String> fieldSequence;
