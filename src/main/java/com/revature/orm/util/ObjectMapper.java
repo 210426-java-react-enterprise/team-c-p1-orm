@@ -94,7 +94,7 @@ public class ObjectMapper {
      *      The returned map will be use to insert the current values in memory to the @Entity table in DB
      *      MAP<Key,Value>
      *          -Key = Annotation's Element Name (for the @Table and @Id this value is replace with a their respective constant value)
-     *          -Value = ArrayList of rest of annotation's elements
+     *          -Value = ArrayList of the rest of annotation's elements
      *
      * @param object -- The respective object to read
      * @return Map<?,?> -- The mapped Treemap<String,ArrayList<String>>
